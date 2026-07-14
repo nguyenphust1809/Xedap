@@ -298,3 +298,9 @@ G:\baocaothuctap\Xedap\Xedap\obj\Debug\net8.0\Xedap.pdb
 G:\baocaothuctap\Xedap\Xedap\obj\Debug\net8.0\Xedap.genruntimeconfig.cache
 G:\baocaothuctap\Xedap\Xedap\obj\Debug\net8.0\ref\Xedap.dll
 G:\baocaothuctap\Xedap\Xedap\obj\Debug\net8.0\swae.build.ex.cache
+G:\baocaothuctap\Xedap\Xedap\bin\Debug\net8.0\out\web.config
+G:\baocaothuctap\Xedap\Xedap\bin\Debug\net8.0\out\appsettings.Development.json
+G:\baocaothuctap\Xedap\Xedap\bin\Debug\net8.0\out\appsettings.json
+G:\baocaothuctap\Xedap\Xedap\bin\Debug\net8.0\out\Xedap.deps.json
+G:\baocaothuctap\Xedap\Xedap\bin\Debug\net8.0\out\Xedap.runtimeconfig.json
+G:\baocaothuctap\Xedap\Xedap\bin\Debug\net8.0\out\Xedap.staticwebassets.endpoints.json
