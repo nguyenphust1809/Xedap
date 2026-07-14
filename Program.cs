@@ -159,9 +159,9 @@ app.MapHub<ChatHub>("/chathub");
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<DataContext>();
-    // SeedData.SeedingData(context);
+    context.Database.Migrate();   // Vẫn cần dòng này để tạo bảng
+    // SeedData.SeedingData(context);  // Bỏ seed data mẫu
 }
-
 // ================== RUN ==================
 using (var scope = app.Services.CreateScope())
 {
