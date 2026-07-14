@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Xedap")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fe1b1e3618076133ccf571d3ae98bdd8aebcc93c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fea28e0bd7d0e9401dafa4635b597d21e49ae0f4")]
 [assembly: System.Reflection.AssemblyProductAttribute("Xedap")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Xedap")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
