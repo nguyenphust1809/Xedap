@@ -1,0 +1,111 @@
+﻿@model IEnumerable<Xedap.Models.OrderDetails>
+@{
+    var order = ViewBag.Order as Xedap.Models.OrderModel;
+
+    // Danh sách trạng thái
+    var statuses = new List<(int Id, string Name, string Icon, string Color)>
+    {
+        (1, "Chờ xác nhận", "fa-clipboard-list", "#ffc107"),  // bg-warning
+        (2, "Chờ lấy hàng", "fa-dollar-sign", "#17a2b8"),     // bg-info
+        (3, "Chờ giao hàng", "fa-truck", "#007bff"),          // bg-primary
+        (4, "Đã giao", "fa-box-open", "#28a745"),             // bg-success
+        (5, "Trả hàng", "fa-undo-alt", "#6c757d"),           // bg-secondary
+        (6, "Đã hủy", "fa-times-circle", "#dc3545")          // bg-danger
+    };
+
+    var currentStatus = statuses.FirstOrDefault(s => s.Id == order.Status);
+    var statusName = currentStatus.Id != 0 ? currentStatus.Name : "-";
+}
+<div class="container mt-5 pt-5">
+    <h3 class="mb-4 text-center">
+        Chi tiết đơn hàng <span class="text-warning">@order.OrderCode</span>
+    </h3>
+
+    <div class="mb-4">
+        <strong>Ngày đặt:</strong> @order.CreatedDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm") <br />
+        <strong>Phí vận chuyển:</strong> @order.ShippingCost.ToString("#,##0 VNĐ") <br />
+        <strong>Coupon:</strong> @(string.IsNullOrEmpty(order.CouponCode) ? "-" : order.CouponCode) <br />
+        <strong>Trạng thái:</strong>
+        <span class="badge" style="background-color:@(currentStatus.Color); color:white;">@statusName</span>
+    </div>
+    @* <div class="mt-4 text-center">
+        <a asp-controller="Shipper"
+           asp-action="TrackOrder"
+           asp-route-orderCode="@order.OrderCode"
+           class="btn btn-warning btn-lg">
+            <i class="fas fa-map-marked-alt"></i> Theo dõi đơn hàng
+        </a>
+    </div> *@
+
+    <!-- Timeline ngang -->
+    <div class="d-flex justify-content-between align-items-center mb-4 position-relative" style="height:60px;">
+        @for (int i = 0; i < statuses.Count; i++)
+        {
+            var s = statuses[i];
+            var isCompleted = order.Status > s.Id;    // các bước đã xong
+            var isCurrent = order.Status == s.Id;     // bước hiện tại
+            var iconColor = isCompleted || isCurrent ? s.Color : "#e0e0e0";
+
+            <div class="text-center" style="flex:1; position:relative;">
+                <!-- Thanh nối -->
+                @if (i < statuses.Count - 1)
+                {
+                    var nextStatus = statuses[i + 1];
+                    var lineColor = order.Status > s.Id ? "#28a745" : "#e0e0e0";
+                    <div style="height:4px; background:@lineColor; position:absolute; top:15px; left:50%; right:-50%; z-index:0;"></div>
+                }
+
+                <!-- Icon tròn -->
+                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                     style="width:35px; height:35px; margin:auto; z-index:1; background:@iconColor; color:white; @(isCurrent ? "border:3px solid #ffc107;" : "")">
+                    <i class="fas @s.Icon"></i>
+                </div>
+                <small class="d-block mt-2">@s.Name</small>
+            </div>
+        }
+    </div>
+
+    <!-- Bảng chi tiết đơn hàng -->
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-bordered table-striped text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Sản phẩm</th>
+                    <th>Giá</th>
+                    <th>Số lượng</th>
+                    <th>Tổng</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    int stt = 1;
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@stt</td>
+                            <td>@item.Product.Name</td>
+                            <td>@item.Price.ToString("#,##0 VNĐ")</td>
+                            <td>@item.Quantity</td>
+                            <td>@((item.Price * item.Quantity).ToString("#,##0 VNĐ"))</td>
+                        </tr>
+                        stt++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="py-3 text-muted">Không có chi tiết đơn hàng</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+  
+</div>
+
+@section Scripts {
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+}

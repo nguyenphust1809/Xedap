@@ -1,0 +1,269 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>@ViewData["title"] - Admin</title>
+
+    <link href="~/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.5/css/buttons.dataTables.css" />
+
+    <link href="~/css/prettyPhoto.css" rel="stylesheet" />
+    <link href="~/css/price-range.css" rel="stylesheet" />
+    <link href="~/css/animate.css" rel="stylesheet" />
+    <link href="~/css/main.css" rel="stylesheet" />
+    <link href="~/css/responsive.css" rel="stylesheet" />
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.2/js/buttons.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.2/js/buttons.print.min.js"></script>
+
+    <!-- CSS DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.2/css/buttons.dataTables.min.css">
+</head>
+
+<body>
+    <header id="header">
+       
+    </header>
+
+    
+
+    <div class="header-bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-9">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                            <span class="sr-only">Chuyển đổi menu</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                    </div>
+
+                    <div class="mainmenu">
+                        <ul class="nav navbar-nav d-flex flex-row flex-nowrap">
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.HttpContext.Request.Path == "/" ? "active" : "")" href="/">
+                                    Trang chủ
+                                </a>
+
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Dashboard" ? "active" : "")"
+                                   asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                    Thống kê
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Product" ? "active" : "")"
+                                   asp-area="Admin" asp-controller="Product" asp-action="Index">
+                                    Sản phẩm
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Shipping" ? "active" : "")"
+                                   asp-area="Admin" asp-controller="Shipping" asp-action="Index">
+                                    Vận chuyển
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Category" ? "active" : "")"
+                                   asp-area="Admin" asp-controller="Category" asp-action="Index">
+                                    Danh mục
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Brand" ? "active" : "")"
+                                   asp-area="Admin" asp-controller="Brand" asp-action="Index">
+                                    Thương hiệu
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Coupon" ? "active" : "")"
+                                   asp-area="Admin" asp-controller="Coupon" asp-action="Index">
+                                    Mã giảm giá
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Order" ? "active" : "")"
+                                   asp-area="Admin" asp-controller="Order" asp-action="Index">
+                                    Đơn hàng
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "User" ? "active" : "")"
+                                   asp-area="Admin" asp-controller="User" asp-action="Index">
+                                    Người dùng
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Role" ? "active" : "")"
+                                   asp-area="Admin" asp-controller="Role" asp-action="Index">
+                                    Phân Quyền
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Contact" ? "active" : "")"
+                                   asp-area="Admin" asp-controller="Contact" asp-action="Index">
+                                    Liên Hệ
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Chat" ? "active" : "")"
+                                   href="/Admin/Chat/Index" class="d-flex align-items-center position-relative">
+                                    <i class="fas fa-comment-dots me-1"></i> Chat
+                                    <span id="chat-badge" class="badge-chat">0</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    @Html.Partial("_NotificationPartial")
+                </div>
+            </div>
+            <div class="row">
+                @RenderBody()
+            </div>
+        </div>
+    </section>
+
+    <footer id="footer"></footer>
+
+    <script src="~/js/bootstrap.min.js"></script>
+    <script src="~/js/jquery.scrollUp.min.js"></script>
+    <script src="~/js/price-range.js"></script>
+    <script src="~/js/jquery.prettyPhoto.js"></script>
+    <script src="~/js/main.js"></script>
+    <script src="~/backend/js/site.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.26.2/dist/sweetalert2.all.min.js"></script>
+
+    <script>
+        $(function () {
+            var message = '@TempData["success"]';
+            if (message != '')
+                Swal.fire(message);
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+    <!-- ========== NÚT CHAT NỔI ADMIN ========== -->
+   
+
+    <!-- CSS cho nút chat -->
+    <style>
+        .mainmenu ul.navbar-nav {
+            display: flex !important; /* flex row */
+            flex-direction: row;
+            flex-wrap: nowrap; /* không xuống dòng */
+            gap: 4px; /* giảm khoảng cách giữa các item */
+        }
+
+        .navbar-nav .nav-item {
+            white-space: nowrap; /* text không xuống dòng */
+        }
+
+        .navbar-nav .nav-link {
+            padding: 5px 6px; /* giảm padding để các item sát nhau */
+            font-size: 14px; /* nhỏ gọn hơn */
+            color: #000; /* màu chữ đen mặc định */
+        }
+
+            .navbar-nav .nav-link:active {
+                color: #fe980f; /* màu cam khi di chuột/focus */
+                background-color: transparent; /* không đổi nền */
+            }
+        #chat-floating-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: #007bff;
+            color: white;
+            font-size: 26px;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            line-height: 60px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            text-decoration: none;
+            z-index: 1050;
+            transition: all 0.3s ease;
+        }
+
+            #chat-floating-btn:hover {
+                background: #0056b3;
+                transform: scale(1.1);
+            }
+
+        #chat-badge {
+            position: absolute;
+            top: -2px;
+            right: -8px;
+            background: red;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 50%;
+            padding: 2px 5px;
+            display: none;
+        }
+    </style>
+
+    <!-- SignalR -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+    <script>
+        // ==========================
+        // Nút chat realtime
+        // ==========================
+        const connection = new signalR.HubConnectionBuilder().withUrl("/chathub").build();
+        const badge = document.getElementById("chat-badge");
+        let unreadCount = 0;
+
+        // Nhận thông báo khi có user mới nhắn tin
+        connection.on("NotifyNewMessage", (sender, message) => {
+            unreadCount++;
+            badge.textContent = unreadCount;
+            badge.style.display = "inline";
+        });
+
+        // Reset số tin chưa đọc khi admin vào trang chat
+        if (window.location.pathname.toLowerCase().includes("/admin/chat")) {
+            unreadCount = 0;
+            badge.style.display = "none";
+        }
+
+        connection.start()
+            .then(() => console.log("✅ SignalR connected (chat notification ready)"))
+            .catch(err => console.error("❌ SignalR error:", err));
+    </script>
+    <!-- ========== HẾT NÚT CHAT NỔI ADMIN ========== -->
+
+</body>
+</html>

@@ -1,0 +1,145 @@
+﻿@using Xedap.Models
+@using Xedap.Models.ViewModels
+@model OrderDetailViewModel
+
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    decimal total = 0;
+    var orderCode = Model.OrderCode;
+    var status = Model.Status;
+    var shippingCost = Model.ShippingCost;
+}
+
+<h3>Chi tiết đơn hàng - @orderCode</h3>
+
+<div class="mb-3 d-flex justify-content-between align-items-start">
+    <!-- Trạng thái đơn hàng -->
+    <div>
+        <label for="order-status" class="form-label fw-bold">Trạng thái đơn hàng:</label>
+        <select id="order-status" class="form-select w-auto d-inline-block" data-order="@orderCode"> <option value="1" selected="@(status == 1 ? "selected" : null)">Chờ xác nhận</option> <option value="2" selected="@(status == 2 ? "selected" : null)">Chờ lấy hàng</option> <option value="0" selected="@(status == 0 ? "selected" : null)">Tất cả trạng thái</option> <option value="3" selected="@(status == 3 ? "selected" : null)">Chờ giao hàng</option> <option value="4" selected="@(status == 4 ? "selected" : null)">Đã giao</option> <option value="5" selected="@(status == 5 ? "selected" : null)">Trả hàng</option> <option value="6" selected="@(status == 6 ? "selected" : null)">Đã hủy</option> <option value="7" selected="@(status == 7 ? "selected" : null)">Đang giao</option> </select>
+    </div>
+
+    <!-- Thông tin người nhận -->
+    <div class="card mb-3 p-3">
+        <h5>Thông tin người nhận</h5>
+        <p><strong>Tên:</strong> @Model.ReceiverName</p>
+        <p><strong>Điện thoại:</strong> @Model.ReceiverPhone</p>
+        <p><strong>Địa chỉ:</strong> @Model.Address, @Model.Ward, @Model.District, @Model.Province</p>
+        <p><strong>Ghi chú:</strong> @Model.Note</p>
+    </div>
+</div>
+
+<!-- Bảng chi tiết sản phẩm -->
+<div class="table-responsive mb-3">
+    <table class="table table-bordered table-hover text-center" id="order-detail-table">
+        <thead class="table-primary">
+            <tr>
+                <th>#</th>
+                <th>Sản phẩm</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th>Tạm tính</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                var subtotal = item.Price * item.Quantity;
+                total += subtotal;
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@(item.Product?.Name ?? $"ID: {item.ProductId}")</td>
+                    <td>@item.Price.ToString("#,##0 VNĐ")</td>
+                    <td>@item.Quantity</td>
+                    <td>@subtotal.ToString("#,##0 VNĐ")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Tổng tiền -->
+<div class="card p-3 mb-4">
+    <div class="row">
+        <div class="col-md-4">
+            <strong>Tổng tiền sản phẩm:</strong> @total.ToString("#,##0 VNĐ")
+        </div>
+        <div class="col-md-4">
+            <strong>Phí vận chuyển:</strong> @shippingCost.ToString("#,##0 VNĐ")
+        </div>
+        <div class="col-md-4">
+            @{
+                var grandTotal = total + shippingCost;
+            }
+            <strong>Tổng cộng:</strong> @grandTotal.ToString("#,##0 VNĐ")
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // DataTable chỉ để in (không hiện nút mặc định)
+            var table = $('#order-detail-table').DataTable({
+                paging: false,
+                info: false,
+                searching: false,
+                ordering: false,
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        extend: 'print',
+                        text: 'In đơn hàng',
+                        title: 'Chi tiết đơn hàng - @orderCode',
+                        exportOptions: { columns: ':visible' }
+                    }
+                ]
+            });
+
+            // Nút in trigger DataTable print
+            $('#print-order').click(function(){
+                table.button(0).trigger();
+            });
+
+            // AJAX update trạng thái đơn hàng
+            $('#order-status').change(function() {
+                var status = parseInt($(this).val());
+                var orderCode = $(this).data('order');
+
+                if (!orderCode) {
+                    alert('Không tìm thấy mã đơn hàng!');
+                    return;
+                }
+
+                var token = $('#__RequestVerificationToken').val();
+
+                $.ajax({
+                    url: '@Url.Action("UpdateOrder", "Order", new { area = "Admin" })',
+                    type: 'POST',
+                    data: {
+                        __RequestVerificationToken: token,
+                        ordercode: orderCode,
+                        status: status
+                    },
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res && res.success) {
+                            alert(res.message);
+                            localStorage.setItem("orderUpdated", orderCode);
+                        } else {
+                            alert('Cập nhật thất bại: ' + (res ? res.message : 'Không xác định'));
+                        }
+                    },
+                    error: function(xhr) {
+                        alert('Cập nhật thất bại: ' + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+}

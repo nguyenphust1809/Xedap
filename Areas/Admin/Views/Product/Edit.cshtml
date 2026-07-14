@@ -1,0 +1,78 @@
+﻿@model ProductModel
+@{
+    ViewData["title"] = "Cập nhật Sản phẩm";
+}
+
+<div class="col-md-9 mx-auto my-4">
+    <h4 class="mb-4" style="color:#fe980f; font-weight:600;">Cập nhật sản phẩm</h4>
+
+    @if (ViewBag.Errors != null)
+    {
+        <ul style="color:red">
+            @foreach (var err in ViewBag.Errors as List<string>)
+            {
+                <li>@err</li>
+            }
+        </ul>
+    }
+
+    <form asp-action="Edit" enctype="multipart/form-data" class="bg-white p-4 rounded shadow-sm border border-fe980f">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="form-group mb-3">
+            <label style="font-weight:500;">Tên sản phẩm</label>
+            <input asp-for="Name" class="form-control border-fe980f" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label style="font-weight:500;">Giá</label>
+            <input asp-for="Price" class="form-control border-fe980f typing-price" />
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label style="font-weight:500;">Capital Price</label>
+            <input asp-for="CapitalPrice" class="form-control border-fe980f typing-price" />
+            <span asp-validation-for="CapitalPrice" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label style="font-weight:500;">Mô tả</label>
+            <textarea asp-for="Description" class="form-control border-fe980f" rows="4"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label style="font-weight:500;">Danh mục</label>
+            <select asp-for="CategoryId" class="form-control border-fe980f" asp-items="ViewBag.Categories">
+                <option value="">--Chọn danh mục--</option>
+            </select>
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label style="font-weight:500;">Thương hiệu</label>
+            <select asp-for="BrandId" class="form-control border-fe980f" asp-items="ViewBag.Brands">
+                <option value="">--Chọn thương hiệu--</option>
+            </select>
+            <span asp-validation-for="BrandId" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-4">
+            <label style="font-weight:500;">Hình ảnh</label>
+            <input asp-for="ImageUpload" type="file" class="form-control border-fe980f" />
+            <span asp-validation-for="ImageUpload" class="text-danger"></span>
+            <img src="~/media/products/@Model.Image" class="mt-2" style="max-width:120px; border-radius:6px;" />
+        </div>
+
+        <div class="form-group text-end">
+            <button type="submit" class="btn" style="border:2px solid #fe980f; background-color:#fff; color:#000; padding:8px 18px; font-weight:500;">
+                <i class="bi bi-pencil-square me-1" style="color:#fe980f;"></i> Cập nhật
+            </button>
+        </div>
+    </form>
+
+    <a asp-action="Index" class="d-block mt-3 text-decoration-none" style="color:#fe980f;">Quay lại </a>
+</div>

@@ -1,0 +1,82 @@
+﻿@model IEnumerable<Xedap.Models.CategoryModel>
+
+<li class="nav-item dropdown mega-dropdown">
+    <a class="nav-link dropdown-toggle fw-semibold" href="#" id="categoryDropdown"
+       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-bars me-2"></i> Danh Mục
+    </a>
+
+    <!-- Mega Dropdown -->
+    <div class="dropdown-menu mega-menu p-4" aria-labelledby="categoryDropdown">
+        <div class="row g-3">
+            @foreach (var cat in Model)
+            {
+                <div class="col-6 col-sm-4 col-md-3">
+                    <a class="dropdown-item text-wrap d-flex align-items-center"
+                       asp-controller="Category"
+                       asp-action="Index"
+                       asp-route-slug="@cat.Slug">
+                        <i class="fa fa-tag text-muted me-2"></i> @cat.Name
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</li>
+
+<style>
+    /* ====== Mega Dropdown ====== */
+    .mega-dropdown {
+        position: relative;
+    }
+
+        /* Hover: hiển thị menu */
+        .mega-dropdown:hover .dropdown-menu {
+            display: block !important;
+            opacity: 1;
+            visibility: visible;
+        }
+
+  .mega-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    transform: none;
+    min-width: 900px;
+    background-color: #ffffff !important;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
+    z-index: 1050;
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.mega-menu .dropdown-item {
+    padding: 6px 10px;
+    border-radius: 6px;
+    color: #000000 !important;
+    font-size: 15px;
+    transition: all 0.2s ease-in-out;
+}
+
+.mega-menu .dropdown-item:hover {
+    background-color: #f8f9fa !important;
+    color: #ee4d2d !important;
+    transform: translateX(3px);
+}
+    /* ✅ Không cần media — fix mobile bằng class của Bootstrap */
+    .navbar-collapse.show .mega-menu {
+        position: static !important;
+        width: 100% !important;
+        transform: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+</style>

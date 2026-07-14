@@ -1,0 +1,68 @@
+﻿@model Xedap.Models.PredictionResult
+@{
+    ViewData["Title"] = "Kết quả dự đoán";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5 pt-5" style="max-width: 960px;">
+    <div class="card shadow-lg border-0 rounded-4 p-4">
+
+        <h3 class="text-center mb-4 fw-bold text-primary">
+            Kết quả phân loại hình ảnh
+        </h3>
+
+        <div class="p-4 bg-light rounded-3 mb-4">
+            <p class="fs-5 mb-2">
+                <strong>Loại sản phẩm:</strong>
+                <span class="text-success">@Model.ClassName</span>
+            </p>
+
+            <p class="fs-5 mb-0">
+                <strong>Độ chính xác:</strong>
+                <span class="text-info fw-bold">@Model.Confidence.ToString("P2")</span>
+            </p>
+        </div>
+
+        @if (Model.RelatedProducts != null && Model.RelatedProducts.Any())
+        {
+            <hr class="my-4" />
+
+            <h5 class="fw-bold text-center text-secondary mb-4">
+                Sản phẩm liên quan
+            </h5>
+
+            <div class="row g-4">
+                @foreach (var product in Model.RelatedProducts)
+                {
+                    <div class="col-6 col-md-4 col-lg-3 d-flex">
+                        <div class="card flex-fill h-100 shadow-sm border-0 rounded-4">
+
+                            <img src="@Url.Content($"~/media/products/{product.Image}")"
+                                 alt="@product.Name"
+                                 class="card-img-top rounded-top-4"
+                                 style="height:180px; object-fit:cover;" />
+
+                            <div class="card-body text-center d-flex flex-column">
+                                <h6 class="card-title fw-semibold mb-2">@product.Name</h6>
+
+                                <p class="text-danger fw-bold mb-3">@product.Price.ToString("N0") ₫</p>
+
+                                <a href="/Product/Detail/@product.Id"
+                                   class="mt-auto btn btn-sm btn-outline-primary rounded-pill">
+                                    Xem chi tiết
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="text-center mt-5">
+            <a href="/Predict" class="btn btn-outline-primary px-5 py-2 rounded-pill fw-semibold">
+                Quay lại trang dự đoán
+            </a>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,659 @@
+﻿@using Xedap.Models
+@using Xedap.Models.ViewModels
+@using Xedap.Repository
+
+@inject DataContext _context
+@model CartItemViewModel
+
+@{
+    ViewData["Title"] = "Thanh toán";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - NguyenPhuShop</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="..."
+          crossorigin="anonymous" />
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        /* LEFT: Form thông tin khách hàng */
+        .checkout-left {
+            flex: 2;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .checkout-left h2 {
+            color: #e91e63;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        /* RIGHT: Tóm tắt đơn hàng */
+        .checkout-right {
+            flex: 1;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+        }
+
+        .checkout-right h3 {
+            color: #e91e63;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        table thead {
+            background: #fafafa;
+        }
+
+        table img {
+            border-radius: 5px;
+        }
+
+        .quantity-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quantity-input {
+            width: 50px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .btn-default {
+            background: #f0f0f0;
+        }
+
+        .btn-danger {
+            background: #e91e63;
+            color: #fff;
+        }
+
+        .grand-total {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: right;
+        }
+
+        .btn-primary {
+            background: #ff5722;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .btn-primary.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .payment-note {
+            margin-top: 15px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f8f8f8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LEFT: Thông tin khách hàng -->
+        <div class="checkout-left">
+            <h2>Thông tin giao hàng</h2>
+
+            <div class="form-group">
+                <label>Người nhận</label>
+                <input type="text"
+                       id="receiverName"
+                       class="form-control"
+                       placeholder="Tên người nhận" />
+            </div>
+
+            <div class="form-group">
+                <label>Số điện thoại</label>
+                <input type="text"
+                       id="receiverPhone"
+                       class="form-control"
+                       placeholder="Số điện thoại người nhận" />
+            </div>
+
+            <div class="form-group">
+                <label>Tỉnh / Thành phố</label>
+                <select id="tinh">
+                    <option value="0">Chọn tỉnh</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Quận / Huyện</label>
+                <select id="quan">
+                    <option value="0">Chọn quận</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Phường / Xã</label>
+                <select id="phuong">
+                    <option value="0">Chọn phường</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Địa chỉ cụ thể</label>
+                <input type="text"
+                       id="address"
+                       class="form-control"
+                       placeholder="Số nhà, tên đường..." />
+            </div>
+
+            <div class="form-group">
+                <label>Ghi chú đơn hàng</label>
+                <input type="text"
+                       id="note"
+                       placeholder="Ví dụ: Giao giờ hành chính" />
+            </div>
+
+            <button type="button" class="btn-primary btn-add-shipping">
+                Tính phí ship
+            </button>
+
+            <span id="ship-warning"
+                  class="text-danger"
+                  style="display:none;">
+                Yêu cầu tính phí vận chuyển trước khi đặt hàng
+            </span>
+        </div>
+
+        <!-- RIGHT: Đơn hàng -->
+        <div class="checkout-right">
+            <h3>Đơn hàng của bạn</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ảnh</th>
+                        <th>Sản phẩm</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Tổng</th>
+                        <th>Xóa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.CartItems.Any())
+                    {
+                        foreach (var item in Model.CartItems)
+                        {
+                            var maxQty = _context.Products
+                                .FirstOrDefault(p => p.Id == item.ProductId)?.Quantity ?? 0;
+
+                            <tr data-id="@item.ProductId" data-max="@maxQty">
+                                <td>
+                                    <img src="~/media/products/@item.Image"
+                                         width="70"
+                                         height="100" />
+                                </td>
+                                <td>@item.ProductName</td>
+                                <td class="price">@item.Price.ToString("N0")</td>
+                                <td>
+                                    <div class="quantity-wrapper">
+                                        <button type="button"
+                                                class="btn btn-default btn-decrease"
+                                                data-id="@item.ProductId">
+                                            -
+                                        </button>
+
+                                        <input type="number"
+                                               min="1"
+                                               max="@maxQty"
+                                               value="@item.Quantity"
+                                               class="quantity-input"
+                                               data-id="@item.ProductId" />
+
+                                        <button type="button"
+                                                class="btn btn-default btn-increase"
+                                                data-id="@item.ProductId">
+                                            +
+                                        </button>
+                                    </div>
+                                </td>
+                                <td class="total">
+                                    @((item.Price * item.Quantity).ToString("N0"))
+                                </td>
+                                <td>
+                                    <a class="btn btn-danger"
+                                       asp-controller="Cart"
+                                       asp-action="Remove"
+                                       asp-route-id="@item.ProductId">
+                                        <i class="fa fa-times"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6">
+                                Giỏ hàng trống
+                                <a asp-controller="Home" asp-action="Index">
+                                    Tiếp tục mua sắm
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (Model.CartItems.Any())
+            {
+                <div class="grand-total">
+                    Tổng tiền:
+                    <span id="grand-total">@Model.GrandTotal.ToString("N0")</span>
+                    VNĐ
+                </div>
+
+                <form>
+                    Mã giảm giá:
+                    <input type="text" class="form-control coupon-value" />
+                    <span class="text text-success">@Model.CouponCode</span>
+                    <input type="button"
+                           value="Áp mã"
+                           class="btn btn-sm btn-primary btn-apply-coupon" />
+                </form>
+
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    <div class="payment-note">
+                        <strong>Phương thức thanh toán:</strong><br />
+                        COD - Thanh toán khi nhận hàng
+                    </div>
+
+                    <button type="button"
+                            id="btnCheckout"
+                            class="btn-primary disabled">
+                        Đặt hàng
+                    </button>
+                }
+            }
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="/lib/sweetalert2/sweetalert2.all.min.js"></script>
+
+    <script>
+        $(function () {
+            function updateTotal() {
+                let productTotal = 0;
+
+                $("tbody tr[data-id]").each(function () {
+                    const qty = parseInt($(this).find(".quantity-input").val());
+                    const price = parseInt(
+                        $(this).find(".price").text().replace(/\./g, "")
+                    );
+                    const rowTotal = qty * price;
+
+                    $(this).find(".total").text(
+                        rowTotal.toLocaleString("vi-VN")
+                    );
+
+                    productTotal += rowTotal;
+                });
+
+                const shippingPrice = parseInt(
+                    $("#grand-total").data("shipping") || 0
+                );
+                const discount = parseInt(
+                    $("#grand-total").data("discount") || 0
+                );
+
+                const newTotal = productTotal + shippingPrice - discount;
+                $("#grand-total").text(newTotal.toLocaleString("vi-VN"));
+            }
+
+            function sendUpdate(id, qty) {
+                $.post(
+                    "@Url.Action("UpdateQuantity", "Cart")",
+                    { id: id, quantity: qty }
+                );
+
+                updateTotal();
+            }
+
+            $(".btn-increase, .btn-decrease").click(function () {
+                const id = $(this).data("id");
+                const input = $(".quantity-input[data-id='" + id + "']");
+                let qty = parseInt(input.val());
+
+                qty += $(this).hasClass("btn-increase") ? 1 : -1;
+
+                const max = parseInt(input.attr("max"));
+
+                if (qty < 1) qty = 1;
+                if (qty > max) qty = max;
+
+                input.val(qty);
+                sendUpdate(id, qty);
+            });
+
+            $(".quantity-input").change(function () {
+                let qty = parseInt($(this).val());
+                const max = parseInt($(this).attr("max"));
+
+                if (qty < 1) qty = 1;
+                if (qty > max) qty = max;
+
+                $(this).val(qty);
+                sendUpdate($(this).data("id"), qty);
+            });
+
+            // Mã giảm giá
+            $(".btn-apply-coupon").click(function () {
+                const couponValue = $(".coupon-value").val();
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetCoupon", "Checkout")',
+                    data: { coupon_value: couponValue },
+                    success: function (result) {
+                        if (result.success) {
+                            Swal.fire(result.message);
+                            $(".text-success").text(result.couponTitle);
+                            $("#grand-total").data("discount", result.discount);
+                            updateTotal();
+                        } else {
+                            Swal.fire(result.message);
+                        }
+                    },
+                    error: function () {
+                        Swal.fire("Lỗi khi áp dụng mã giảm giá!");
+                    }
+                });
+            });
+
+            // Load tỉnh
+            $.getJSON(
+                "https://esgoo.net/api-tinhthanh/1/0.htm",
+                function (res) {
+                    if (res.error === 0) {
+                        $.each(res.data, function (_, item) {
+                            $("#tinh").append(
+                                `<option value="${item.id}">${item.full_name}</option>`
+                            );
+                        });
+                    }
+                }
+            );
+
+            // Load quận/huyện theo tỉnh
+            $("#tinh").change(function () {
+                const id = $(this).val();
+
+                $("#quan").html('<option value="0">Chọn quận</option>');
+                $("#phuong").html('<option value="0">Chọn phường</option>');
+
+                $.getJSON(
+                    `https://esgoo.net/api-tinhthanh/2/${id}.htm`,
+                    function (res) {
+                        if (res.error === 0) {
+                            $.each(res.data, function (_, item) {
+                                $("#quan").append(
+                                    `<option value="${item.id}">${item.full_name}</option>`
+                                );
+                            });
+                        }
+                    }
+                );
+            });
+
+            // Load phường/xã theo quận/huyện
+            $("#quan").change(function () {
+                const id = $(this).val();
+
+                $("#phuong").html('<option value="0">Chọn phường</option>');
+
+                $.getJSON(
+                    `https://esgoo.net/api-tinhthanh/3/${id}.htm`,
+                    function (res) {
+                        if (res.error === 0) {
+                            $.each(res.data, function (_, item) {
+                                $("#phuong").append(
+                                    `<option value="${item.id}">${item.full_name}</option>`
+                                );
+                            });
+                        }
+                    }
+                );
+            });
+
+            // Tính phí ship
+            $(".btn-add-shipping").click(function () {
+                const tinh = $("#tinh").val();
+                const quan = $("#quan").val();
+                const phuong = $("#phuong").val();
+                const address = $("#address").val();
+
+                if (
+                    tinh === "0" ||
+                    quan === "0" ||
+                    phuong === "0" ||
+                    !address
+                ) {
+                    Swal.fire("Vui lòng điền đầy đủ địa chỉ để tính phí ship");
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetShipping", "Cart")',
+                    data: { tinh, quan, phuong },
+                    success: function (result) {
+                        Swal.fire(
+                            "Phí ship: " +
+                            result.shippingPrice.toLocaleString("vi-VN") +
+                            " VNĐ"
+                        );
+
+                        $("#grand-total").data(
+                            "shipping",
+                            result.shippingPrice
+                        );
+
+                        if (result.shippingPrice < 0) {
+                            $("#btnCheckout")
+                                .addClass("disabled")
+                                .css("pointer-events", "none");
+                            $("#ship-warning").show();
+                        } else {
+                            $("#btnCheckout")
+                                .removeClass("disabled")
+                                .css("pointer-events", "auto");
+                            $("#ship-warning").hide();
+                        }
+
+                        updateTotal();
+                    },
+                    error: function () {
+                        Swal.fire("Đã xảy ra lỗi khi tính phí ship");
+                    }
+                });
+            });
+
+            // Đặt hàng bằng COD
+            $("#btnCheckout").click(function () {
+                if ($(this).hasClass("disabled")) return;
+
+                const form = $("<form>", {
+                    method: "POST",
+                    action: '@Url.Action("Checkout", "Checkout")'
+                });
+
+                form.append(
+                    $("<input>", {
+                        type: "hidden",
+                        name: "ShippingCost",
+                        value: $("#grand-total").data("shipping") || 0
+                    })
+                );
+
+                form.append(
+                    $("<input>", {
+                        type: "hidden",
+                        name: "CouponCode",
+                        value: $(".text-success").text() || ""
+                    })
+                );
+
+                form.append(
+                    $("<input>", {
+                        type: "hidden",
+                        name: "Amount",
+                        value:
+                            parseInt(
+                                $("#grand-total").text().replace(/\./g, "")
+                            ) || 0
+                    })
+                );
+
+                form.append(
+                    $("<input>", {
+                        type: "hidden",
+                        name: "ReceiverName",
+                        value: $("#receiverName").val()
+                    })
+                );
+
+                form.append(
+                    $("<input>", {
+                        type: "hidden",
+                        name: "ReceiverPhone",
+                        value: $("#receiverPhone").val()
+                    })
+                );
+
+                form.append(
+                    $("<input>", {
+                        type: "hidden",
+                        name: "Address",
+                        value: $("#address").val()
+                    })
+                );
+
+                form.append(
+                    $("<input>", {
+                        type: "hidden",
+                        name: "Province",
+                        value: $("#tinh option:selected").text()
+                    })
+                );
+
+                form.append(
+                    $("<input>", {
+                        type: "hidden",
+                        name: "District",
+                        value: $("#quan option:selected").text()
+                    })
+                );
+
+                form.append(
+                    $("<input>", {
+                        type: "hidden",
+                        name: "Ward",
+                        value: $("#phuong option:selected").text()
+                    })
+                );
+
+                form.append(
+                    $("<input>", {
+                        type: "hidden",
+                        name: "Note",
+                        value: $("#note").val()
+                    })
+                );
+
+                form.append(
+                    $("<input>", {
+                        type: "hidden",
+                        name: "PaymentMethod",
+                        value: "COD"
+                    })
+                );
+
+                $("body").append(form);
+                form.submit();
+            });
+        });
+    </script>
+</body>
+</html>

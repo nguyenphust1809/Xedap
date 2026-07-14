@@ -1,0 +1,59 @@
+﻿@model IEnumerable<Xedap.Models.OrderModel>
+@using System.Globalization
+
+<div class="container mt-4">
+    <h2>Đơn hàng có thể giao</h2>
+
+    <div class="row g-3 mt-3">
+        @foreach (var order in Model)
+        {
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Mã: @order.OrderCode</h5>
+                        <p class="card-text mb-1"><strong>Khách hàng:</strong> @order.UserName</p>
+                        <p class="card-text mb-1"><strong>Địa chỉ:</strong> @order.Address, @order.Ward, @order.District, @order.Province</p>
+                        <p class="card-text mb-1">
+                            <strong>Giá vận chuyển:</strong> @order.ShippingCost.ToString("N0", new CultureInfo("vi-VN"))đ
+                        </p>
+                        <p class="card-text mb-1">
+                            <strong>Trạng thái:</strong>
+                            @switch (order.Status)
+                            {
+                                case 2:
+                                    <span class="badge bg-primary">Chờ lấy hàng</span>
+                                    ; break;
+                                case 7:
+                                    <span class="badge bg-warning text-dark">Đang giao</span>
+                                    ; break;
+                                case 4:
+                                    <span class="badge bg-success">Đã giao</span>
+                                    ; break;
+                                default:
+                                    <span class="badge bg-secondary">-</span>
+                                    ; break;
+                            }
+                        </p>
+
+                        <div class="mt-2">
+                            @if (order.Status == 2)
+                            {
+                                <form asp-action="MarkInDelivery" asp-controller="Shipper" method="post">
+                                    <input type="hidden" name="id" value="@order.Id" />
+                                    <button type="submit" class="btn btn-sm btn-primary w-100">Nhận giao</button>
+                                </form>
+                            }
+                            else if (order.Status == 7)
+                            {
+                                <form asp-action="MarkDelivered" asp-controller="Shipper" method="post">
+                                    <input type="hidden" name="id" value="@order.Id" />
+                                    <button type="submit" class="btn btn-sm btn-success w-100">Đã giao xong</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

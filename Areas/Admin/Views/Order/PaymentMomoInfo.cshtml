@@ -1,0 +1,36 @@
+﻿@model Xedap.Models.MomoInfoModel
+
+@{
+    ViewData["Title"] = "Thông tin giao dịch Momo";
+}
+
+<div class="container mt-4">
+    <h2>@ViewData["Title"]</h2>
+
+    <a class="btn btn-secondary mb-3" asp-action="Index" asp-controller="Order">
+        <i class="bi bi-arrow-left"></i> Quay về danh sách đơn hàng
+    </a>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Mã đơn hàng</th>
+                    <th>Thông tin đơn hàng</th>
+                    <th>Khách hàng</th>
+                    <th>Số tiền</th>
+                    <th>Ngày thanh toán</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@Model.OrderId</td>
+                    <td>@Model.OrderInfo</td>
+                    <td>@Model.FullName</td>
+                    <td>@Model.Amount.ToString("C")</td> @* Format tiền tệ *@
+                    <td>@Model.DatePaid.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td> @* Format ngày giờ *@
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

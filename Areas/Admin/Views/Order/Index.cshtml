@@ -1,0 +1,172 @@
+﻿@model IEnumerable<Xedap.Models.OrderModel>
+@{
+    ViewData["Title"] = "Danh sách đặt hàng";
+    int statusFilter = ViewBag.StatusFilter != null ? (int)ViewBag.StatusFilter : 0;
+
+    var statusOptions = new Dictionary<int, string>
+    {
+        { 0, "Tất cả trạng thái" },
+        { 1, "Chờ xác nhận" },
+        { 2, "Chờ lấy hàng" },
+        { 3, "Chờ giao hàng" },
+        { 4, "Đã giao" },
+        { 5, "Trả hàng" },
+        { 6, "Đã hủy" },
+        { 7, "Đang giao" }
+
+    };
+}
+
+
+
+<div class="container mt-5">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+
+    <!-- Filter và tìm kiếm -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Mã đơn hàng</label>
+                    <input type="text" name="searchOrderCode" class="form-control"
+                           placeholder="Nhập mã đơn hàng" value="@ViewBag.SearchOrderCode" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Tên khách hàng</label>
+                    <input type="text" name="searchUserName" class="form-control"
+                           placeholder="Tên khách hàng" value="@ViewBag.SearchUserName" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Trạng thái</label>
+                    <select name="status" class="form-select">
+                        @foreach (var kvp in statusOptions)
+                        {
+                            <option value="@kvp.Key" selected="@(statusFilter == kvp.Key ? "selected" : null)">
+                                @kvp.Value
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bảng danh sách đơn hàng -->
+    <div class="table-responsive shadow-sm">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Mã đơn hàng</th>
+                    <th>Giá vận chuyển</th>
+                    <th>Giảm giá</th>
+                    <th>Người đặt</th>
+                    <th>Ngày đặt</th>
+                    <th>Trạng thái</th>
+                    <th>Thanh toán</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    int stt = 1 + ((ViewBag.CurrentPage - 1) * 10);
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@stt</td>
+                            <td>@item.OrderCode</td>
+<td>@(item.ShippingCost.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) + "đ")</td>
+                            <td>@(string.IsNullOrEmpty(item.CouponCode) ? "-" : item.CouponCode)</td>
+                            <td>@item.UserName</td>
+                            <td>@item.CreatedDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                           <td>
+    @switch(item.Status)
+    {
+        case 1: <span class="badge" style="background-color:#ffc107 !important; color:#000 !important;">Chờ xác nhận</span>; break;
+        case 2: <span class="badge" style="background-color:#17a2b8 !important; color:#000 !important;">Chờ lấy hàng</span>; break;
+        case 3: <span class="badge" style="background-color:#007bff !important; color:#fff !important;">Chờ giao hàng</span>; break;
+        case 4: <span class="badge" style="background-color:#28a745 !important; color:#fff !important;">Đã giao</span>; break;
+        case 5: <span class="badge" style="background-color:#6c757d !important; color:#fff !important;">Trả hàng</span>; break;
+        case 6: <span class="badge" style="background-color:#dc3545 !important; color:#fff !important;">Đã hủy</span>; break;
+        default: <span class="badge" style="background-color:#f8f9fa !important; color:#000 !important;">-</span>; break;
+                    case 7: <span class="badge bg-warning text-dark">Đang giao</span>; break;
+
+    }
+</td>
+
+                          <td>
+    @if (string.IsNullOrEmpty(item.PaymentMethod) || item.PaymentMethod == "COD")
+    {
+        <span class="badge" style="background-color:#28a745 !important; color:#fff !important;">COD</span>
+    }
+    else
+    {
+        <span class="badge" style="background-color:#A50064 !important; color:#fff !important;">MOMO</span>
+        <a asp-action="PaymentMomoInfo" asp-controller="Order" 
+           asp-route-orderId="@item.PaymentMethod" class="ms-1 text-decoration-none">
+            Xem chi tiết
+        </a>
+    }
+</td>
+
+                            <td>
+                                <a asp-area="Admin" asp-action="ViewOrder" asp-controller="Order"
+                                   asp-route-ordercode="@item.OrderCode" class="btn btn-sm btn-outline-primary mb-1 w-100">
+                                    <i class="bi bi-eye"></i> Chi tiết
+                                </a>
+                                <a asp-area="Admin" asp-action="Delete" asp-controller="Order"
+                                   asp-route-ordercode="@item.OrderCode" class="btn btn-sm btn-outline-danger w-100"
+                                   onclick="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này không?')">
+                                    <i class="bi bi-trash"></i> Xóa
+                                </a>
+                            </td>
+                        </tr>
+                        stt++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-4">Không có đơn hàng nào</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Phân trang -->
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav aria-label="Page navigation" class="mt-3">
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" href="@Url.Action("Index", "Order", new {
+                            page = i,
+                            searchOrderCode = ViewBag.SearchOrderCode,
+                            searchUserName = ViewBag.SearchUserName,
+                            status = ViewBag.StatusFilter
+                        })">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        window.addEventListener("storage", function(e){
+            if(e.key === "orderUpdated"){
+                location.reload();
+                localStorage.removeItem("orderUpdated");
+            }
+        });
+    </script>
+}

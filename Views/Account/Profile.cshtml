@@ -1,0 +1,76 @@
+﻿@model Xedap.Models.AppUserModel
+
+@{
+    ViewData["Title"] = "Thông tin tài khoản";
+}
+
+<div class="container mt-5" style="padding-top: 120px;">
+    <!-- tránh header che -->
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm rounded-4 border-0">
+                <!-- Header -->
+                <div class="card-header text-center py-3" style="background-color: #007bff; color: white; border-radius: 1rem 1rem 0 0;">
+                    <h3 class="mb-0 fw-bold">@Model.UserName</h3>
+                    <small>Thông tin tài khoản</small>
+                </div>
+
+                <!-- Body -->
+                <div class="card-body p-4">
+                    <!-- Username -->
+                    <div class="mb-3 d-flex align-items-center border-bottom pb-2">
+                        <i class="fa fa-user text-primary me-3"></i>
+                        <div>
+                            <strong>@Model.UserName</strong><br />
+                            <small class="text-muted">Username</small>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3 d-flex align-items-center border-bottom pb-2">
+                        <i class="fa fa-envelope text-secondary me-3"></i>
+                        <div>
+                            <strong>@Model.Email</strong><br />
+                            <small class="text-muted">Email</small>
+                        </div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="mb-3 d-flex align-items-center border-bottom pb-2">
+                        <i class="fa fa-phone text-success me-3"></i>
+                        <div>
+                            <strong>@Model.PhoneNumber</strong><br />
+                            <small class="text-muted">Số điện thoại</small>
+                        </div>
+                    </div>
+
+                    <!-- Nút cập nhật -->
+                    <div class="d-grid mt-4">
+                        <a href="@Url.Action("UpdateAccount", "Account")" class="btn btn-primary">
+                            <i class="fa fa-edit me-2"></i> Cập nhật thông tin
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+    .card:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s;
+    }
+
+    (max-width: 576px) {
+        .card-body strong
+
+    {
+        font-size: 0.95rem;
+    }
+
+    }
+</style>

@@ -1,0 +1,165 @@
+﻿@model Xedap.Models.CouponModel
+@{
+    ViewData["Title"] = "Tạo Mã Giảm Giá";
+}
+
+<h4>Tạo mã giảm giá mới</h4>
+
+<form asp-action="Create" autocomplete="off" asp-controller="Coupon" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <!-- Tên mã giảm giá -->
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Tên mã giảm giá</label>
+        <input asp-for="Name" class="form-control" placeholder="Nhập tên mã giảm giá" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <!-- Mô tả -->
+    <div class="form-group">
+        <label asp-for="Description" class="control-label">Mô tả mã giảm giá</label>
+        <input asp-for="Description" class="form-control" placeholder="Nhập mô tả mã giảm giá" />
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <!-- Ngày bắt đầu -->
+    <div class="form-group">
+        <label asp-for="DateStart" class="control-label">Ngày bắt đầu</label>
+        <input asp-for="DateStart" type="datetime-local" class="form-control" />
+        <span asp-validation-for="DateStart" class="text-danger"></span>
+    </div>
+
+    <!-- Ngày kết thúc -->
+    <div class="form-group">
+        <label asp-for="DateExpired" class="control-label">Ngày kết thúc</label>
+        <input asp-for="DateExpired" type="datetime-local" class="form-control" />
+        <span asp-validation-for="DateExpired" class="text-danger"></span>
+    </div>
+
+    <!-- Số lượng -->
+    <div class="form-group">
+        <label asp-for="Quantity" class="control-label">Số lượng mã</label>
+        <input asp-for="Quantity" class="form-control" placeholder="Nhập số lượng mã giảm giá" />
+        <span asp-validation-for="Quantity" class="text-danger"></span>
+    </div>
+
+    <!-- Chọn loại giảm -->
+    <div class="form-group">
+        <label>Loại giảm</label><br />
+        <label><input type="radio" name="DiscountType" value="Amount" checked /> Giảm theo số tiền</label>
+        <label class="ms-3"><input type="radio" name="DiscountType" value="Percent" /> Giảm theo %</label>
+    </div>
+
+    <!-- Giảm theo số tiền -->
+    <div class="form-group" id="amountDiv">
+        <label asp-for="DiscountAmount" class="control-label">Số tiền giảm</label>
+        <input asp-for="DiscountAmount" type="number" step="0.01" class="form-control" placeholder="Nhập số tiền giảm (VNĐ)" />
+        <span asp-validation-for="DiscountAmount" class="text-danger"></span>
+    </div>
+
+    <!-- Giảm theo % -->
+    <div class="form-group" id="percentDiv" style="display:none;">
+        <label asp-for="DiscountPercent" class="control-label">Phần trăm giảm</label>
+        <input asp-for="DiscountPercent" type="number" step="1" class="form-control" placeholder="Nhập % giảm" />
+        <span asp-validation-for="DiscountPercent" class="text-danger"></span>
+    </div>
+
+    <!-- Trạng thái -->
+    <div class="form-group">
+        <label asp-for="Status" class="control-label">Trạng thái</label>
+        <select asp-for="Status" class="form-control">
+            <option value="1">Hiển thị</option>
+            <option value="0">Ẩn</option>
+        </select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mt-3">
+        <button type="submit" class="btn btn-primary">Tạo mã giảm giá</button>
+    </div>
+</form>
+
+<h5 class="mt-4">Danh sách mã giảm giá</h5>
+
+<table class="table table-striped" id="myTable">
+    <thead>
+        <tr>
+            <th>Tên</th>
+            <th>Mô tả</th>
+            <th>Giảm tiền</th>
+            <th>Giảm %</th>
+            <th>Ngày bắt đầu</th>
+            <th>Ngày kết thúc</th>
+            <th>Số lượng</th>
+            <th>Trạng thái</th>
+            <th>Hạn sử dụng</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (ViewBag.Coupons != null)
+        {
+            foreach (var coupon in ViewBag.Coupons)
+            {
+                <tr>
+                    <td>@coupon?.Name</td>
+                    <td>@coupon?.Description</td>
+                    <td>@(coupon?.DiscountAmount?.ToString("N0") ?? "0")</td>
+                    <td>@($"{(coupon?.DiscountPercent ?? 0)} %")</td>
+                    <td>@coupon?.DateStart.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@coupon?.DateExpired.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@coupon?.Quantity</td>
+                    <td>
+                        <select class="form-control">
+                            <option value="1" selected="@(coupon.Status == 1)">Kích hoạt</option>
+                            <option value="0" selected="@(coupon.Status == 0)">Ẩn</option>
+                        </select>
+                    </td>
+                    <td>
+                        @{
+                            var expiredDate = coupon?.DateExpired ?? DateTime.MinValue;
+                            if (expiredDate == DateTime.MinValue)
+                            {
+                                <span class="text-danger">Chưa có ngày</span>
+                                ;
+                            }
+                            else if (expiredDate < DateTime.Now)
+                            {
+                                <span class="text-danger">Hết hạn</span>
+                                ;
+                            }
+                            else
+                            {
+                                int daysRemaining = (expiredDate - DateTime.Now).Days;
+                                if (daysRemaining <= 0)
+                                {
+                                    <span class="text-danger">Hôm nay</span>
+                                    ;
+                                }
+                                else
+                                {
+                                    <span class="text-success">@daysRemaining ngày còn lại</span>
+                                    ;
+                                }
+                            }
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        const radios = document.querySelectorAll('input[name="DiscountType"]');
+        radios.forEach(r => {
+            r.addEventListener('change', function () {
+                document.getElementById('amountDiv').style.display = this.value === 'Amount' ? '' : 'none';
+                document.getElementById('percentDiv').style.display = this.value === 'Percent' ? '' : 'none';
+            });
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

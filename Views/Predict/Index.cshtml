@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["Title"] = "Dự đoán hình ảnh";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5 pt-5" style="max-width: 600px;">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-4">
+
+            <h3 class="text-center mb-4 fw-bold">Hệ thống dự đoán sản phẩm</h3>
+
+            <form asp-controller="Predict" asp-action="PostPredict"
+                  method="post" enctype="multipart/form-data">
+
+                <!-- Upload -->
+                <div class="mb-4">
+                    <label for="fileUpload" class="form-label fw-semibold">
+                        Chọn hình ảnh:
+                    </label>
+                    <input type="file" name="file" id="fileUpload" class="form-control" required />
+                </div>
+
+                <!-- Preview -->
+                <div class="mb-4 text-center">
+                    <img id="previewImg" src="#" alt=""
+                         class="img-fluid rounded shadow"
+                         style="display:none; max-height: 250px; object-fit: cover;">
+                </div>
+
+                <!-- Button -->
+                <div class="d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold rounded-pill">
+                        Dự đoán
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Xem trước hình ảnh
+    const fileInput = document.getElementById("fileUpload");
+    const preview = document.getElementById("previewImg");
+
+    fileInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) {
+            preview.style.display = "block";
+            preview.src = URL.createObjectURL(file);
+        }
+    });
+</script>

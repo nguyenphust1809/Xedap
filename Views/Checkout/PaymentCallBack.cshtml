@@ -1,0 +1,59 @@
+﻿@using Xedap.Models.Momo
+@model MomoExecuteResponseModel
+
+@{
+    ViewData["Title"] = "Thanh toán thành công";
+}
+
+<div class="container" style="margin-top:120px; margin-bottom:50px;">
+    <div class="card shadow-sm border-0" style="border-radius: 14px;">
+        <div class="card-body p-4">
+
+            <div class="text-center mb-4">
+                <i class="fa fa-check-circle" style="font-size: 60px; color: #fe980f;"></i>
+                <h3 class="mt-3 fw-bold" style="color:#fe980f;">Thanh toán MOMO thành công!</h3>
+                <p class="text-muted">Cảm ơn bạn đã mua hàng tại Nguyễn Phú Shop ❤️</p>
+            </div>
+
+            <div class="mb-3">
+                <h5 class="fw-bold" style="color:#fe980f;">Thông tin giao dịch</h5>
+                <hr />
+                <p><strong>Mã đơn hàng:</strong> @Model.OrderId</p>
+                <p><strong>Nội dung thanh toán:</strong> @Model.OrderInfo</p>
+                <p><strong>Tổng tiền:</strong> @String.Format("{0:N0} đ", Model.Amount)</p>
+            </div>
+
+            <div class="text-center mt-4">
+                <a asp-controller="Account" asp-action="History"
+                   class="btn px-4 py-2 text-white"
+                   style="border-radius: 25px; background-color:#fe980f; border:none; font-weight:600;">
+                    <i class="fa fa-list-alt me-2"></i> Xem lịch sử đơn hàng
+                </a>
+
+                <a href="/"
+                   class="btn ms-2 px-4 py-2"
+                   style="border-radius: 25px; border:2px solid #fe980f; color:#fe980f; font-weight:600;">
+                    <i class="fa fa-home me-2"></i> Quay về trang chủ
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Nút cam hover phù hợp layout */
+    a.btn:hover {
+        opacity: .9;
+        text-decoration: none;
+    }
+
+    a.btn.text-white:hover {
+        background-color: #d97a00 !important;
+    }
+
+    a.btn:not(.text-white):hover {
+        background-color: #fe980f !important;
+        color: white !important;
+    }
+</style>

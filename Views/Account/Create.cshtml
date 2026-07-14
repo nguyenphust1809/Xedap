@@ -1,0 +1,158 @@
+﻿@model Xedap.Models.UserModel
+@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = null; // Không dùng layout chung
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            font-family: "Segoe UI", sans-serif;
+            background: #000 url('/images/sieuseo.png') center center / contain no-repeat fixed;
+        }
+
+            body::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.4);
+                backdrop-filter: blur(3px);
+                z-index: 0;
+            }
+
+        .register-wrapper {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            width: 420px;
+            padding: 40px 30px;
+            z-index: 1;
+        }
+
+            .register-wrapper h2 {
+                text-align: center;
+                margin-bottom: 25px;
+                font-weight: 600;
+                color: #333;
+            }
+
+        .form-control {
+            height: 45px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            transition: 0.2s ease-in-out;
+        }
+
+            .form-control:focus {
+                border-color: #007bff;
+                box-shadow: 0 0 5px rgba(0,123,255,0.4);
+            }
+
+        .btn-primary {
+            width: 100%;
+            border-radius: 10px;
+            height: 45px;
+            font-weight: 500;
+            background: linear-gradient(135deg,#007bff,#6c63ff);
+            border: none;
+            transition: background 0.3s ease;
+        }
+
+            .btn-primary:hover {
+                background: linear-gradient(135deg,#0056d2,#574bff);
+            }
+
+        .text-danger {
+            font-size: 0.9rem;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+            .login-link a {
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+                .login-link a:hover {
+                    text-decoration: underline;
+                }
+    </style>
+</head>
+<body>
+    <div class="register-wrapper">
+        <h2>Đăng ký tài khoản</h2>
+
+        <!-- Hiển thị thông báo success/error -->
+        @if (TempData["success"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["success"]
+            </div>
+        }
+        @if (TempData["error"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["error"]
+            </div>
+        }
+
+        <!-- Hiển thị lỗi Validation -->
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <form asp-action="Create" asp-controller="Account" method="post">
+            <div class="mb-3">
+                <label asp-for="UserName" class="form-label">Tên đăng nhập</label>
+                <input asp-for="UserName" class="form-control" placeholder="Nhập tên đăng nhập..." />
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" placeholder="Nhập email..." />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">Mật khẩu</label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="Nhập mật khẩu..." />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Tạo tài khoản</button>
+
+            <div class="login-link">
+                <span>Đã có tài khoản?</span>
+                <a asp-action="Login" asp-controller="Account" class="text-primary fw-semibold">Đăng nhập ngay</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery + Validation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

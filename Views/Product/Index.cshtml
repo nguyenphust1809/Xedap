@@ -1,0 +1,300 @@
+﻿@model IEnumerable<Xedap.Models.ProductModel>
+@inject Xedap.Repository.DataContext _context
+
+@{
+    ViewData["Title"] = "Danh sách sản phẩm";
+
+    int totalProducts = ViewBag.TotalItems ?? Model.Count();
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int pageSize = ViewBag.PageSize ?? 12;
+    int totalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
+
+    var categories = _context.Categories.ToList();
+    var brands = _context.Brands.ToList();
+}
+
+@section Styles {
+    <style>
+        .category-text a {
+            color: #fe980f !important;
+            text-decoration: none;
+        }
+        .product-card {
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            height: 430px;
+            transition: 0.3s ease;
+            position: relative;
+        }
+        .product-img { height: 230px; object-fit: contain; padding:16px; transition: transform 0.3s; }
+        .product-info { text-align: center; padding: 15px; min-height: 150px; display: flex; flex-direction: column; justify-content: flex-start; }
+        .product-info h3 { font-size: 17px; font-weight: 600; margin-top: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; min-height:45px; }
+        .product-meta { font-size:14px; color:#fe980f; }
+        .price { color:#e74c3c; font-weight:bold; font-size:20px; }
+        .product-actions { padding:12px; border-top:1px solid #eee; background:#fafafa; }
+        .btn-add { background:#27ae60; color:#fff; font-weight:600; border-radius:8px; }
+        .btn-add:hover { background:#1f8b4e; }
+        .btn-out { background:#bfc6ce; color:#444; border-radius:8px; }
+        .filter-box { background:#fff; padding:20px; border-radius:12px; box-shadow:0 3px 10px rgba(0,0,0,0.05); margin-bottom:20px; }
+        .badge-stock { position:absolute; top:10px; left:10px; padding:5px 10px; border-radius:12px; font-size:12px; font-weight:600; }
+        .badge-instock { background-color:#27ae60; color:#fff; }
+        .badge-outstock { background-color:#e74c3c; color:#fff; }
+    </style>
+}
+
+<div class="container" style="margin-top:140px;">
+    <div class="row">
+        <div class="col-lg-3">
+            @Html.Partial("_SideBarPartial")
+        </div>
+
+        <div class="col-lg-9">
+          <!-- Filter Form -->
+<form method="get" class="d-flex flex-wrap gap-2 mb-3 filter-box align-items-center">
+
+    <!-- Category Filter -->
+    <select name="categoryId" class="form-select w-auto">
+        <option value="">Tất cả danh mục</option>
+        @foreach (var c in categories)
+        {
+            if (ViewBag.CategoryId == c.Id)
+            {
+                <option value="@c.Id" selected>@c.Name</option>
+            }
+            else
+            {
+                <option value="@c.Id">@c.Name</option>
+            }
+        }
+    </select>
+
+    <!-- Brand Filter -->
+    <select name="brandId" class="form-select w-auto">
+        <option value="">Tất cả thương hiệu</option>
+        @foreach (var b in brands)
+        {
+            if (ViewBag.BrandId == b.Id)
+            {
+                <option value="@b.Id" selected>@b.Name</option>
+            }
+            else
+            {
+                <option value="@b.Id">@b.Name</option>
+            }
+        }
+    </select>
+
+    <!-- Search -->
+    <input type="text" name="search" value="@ViewBag.Search" class="form-control w-auto" placeholder="Tìm kiếm..." />
+
+    <!-- Sort -->
+    <select name="sort_by" class="form-select w-auto">
+        <option value="">Mặc định</option>
+
+        @if (ViewBag.SortBy == "price_increase")
+        {
+            <option value="price_increase" selected>Giá tăng dần</option>
+        }
+        else
+        {
+            <option value="price_increase">Giá tăng dần</option>
+        }
+
+        @if (ViewBag.SortBy == "price_decrease")
+        {
+            <option value="price_decrease" selected>Giá giảm dần</option>
+        }
+        else
+        {
+            <option value="price_decrease">Giá giảm dần</option>
+        }
+
+        @if (ViewBag.SortBy == "newest")
+        {
+            <option value="newest" selected>Mới nhất</option>
+        }
+        else
+        {
+            <option value="newest">Mới nhất</option>
+        }
+    </select>
+
+    <button type="submit" class="btn btn-primary">Lọc</button>
+</form>
+
+
+            <h5 class="mb-3">Tất cả sản phẩm (@totalProducts sản phẩm)</h5>
+
+            <div class="row g-4">
+                @foreach (var item in Model)
+                {
+                    var availableQty = item.Quantity - item.Sold;
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <div class="product-card" data-product-id="@item.Id" data-quantity="@availableQty">
+                            <span class="badge-stock @(availableQty > 0 ? "badge-instock" : "badge-outstock")">
+                                @(availableQty > 0 ? "Còn hàng" : "Hết hàng")
+                            </span>
+
+                            <!-- Ảnh sản phẩm bấm vào xem chi tiết -->
+                            <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id">
+                                <img src="~/media/products/@item.Image" class="product-img" alt="@item.Name" />
+                            </a>
+
+                            <div class="product-info">
+                                <div class="price">@item.Price.ToString("N0") ₫</div>
+                                <!-- Tên sản phẩm bấm vào xem chi tiết -->
+                                <h3>
+                                    <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="text-dark text-decoration-none">
+                                        @item.Name
+                                    </a>
+                                </h3>
+                                <div class="product-meta">
+                                    Danh mục: <span style="color:#fe980f">@item.Category?.Name</span> <br />
+                                    Thương hiệu: @item.Brand?.Name
+                                </div>
+                                <p class="text-truncate mt-2" style="-webkit-line-clamp:2; display:-webkit-box; -webkit-box-orient: vertical;">
+                                    @Html.Raw(item.Description)
+                                </p>
+                            </div>
+
+                            <div class="product-actions">
+                                @if (availableQty > 0)
+                                {
+                                    <button class="btn-add w-100 add-to-cart-btn">
+                                        <i class="fa fa-cart-plus"></i> Thêm vào giỏ
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-out w-100" disabled>Hết hàng</button>
+                                }
+                                <span class="cart-message position-absolute top-0 start-50 translate-middle-x text-success fw-bold" style="display:none;"></span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+
+            <!-- Pagination -->
+            @if (totalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1, categoryId = ViewBag.CategoryId, brandId = ViewBag.BrandId, search = ViewBag.Search, sort_by = ViewBag.SortBy })">«</a>
+                        </li>
+
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = i, categoryId = ViewBag.CategoryId, brandId = ViewBag.BrandId, search = ViewBag.Search, sort_by = ViewBag.SortBy })">@i</a>
+                            </li>
+                        }
+
+                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1, categoryId = ViewBag.CategoryId, brandId = ViewBag.BrandId, search = ViewBag.Search, sort_by = ViewBag.SortBy })">»</a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+                  $(document).ready(function () {
+
+            function showToast(card, message, success = true) {
+                var toast = card.find('.cart-message');
+                toast.text(message)
+                     .css('color', success ? '#27ae60' : '#e74c3c')
+                     .fadeIn(200).delay(1000).fadeOut(200);
+            }
+
+            function animateCartCount(newCount) {
+                var cart = $('.cart-count');
+                cart.fadeOut(100, function () {
+                    cart.text(newCount).fadeIn(100).animate({ fontSize: '1.5em' }, 200).animate({ fontSize: '1em' }, 200);
+                });
+            }
+
+            function flyToCart(img, cartSelector) {
+                var cart = $(cartSelector);
+                var imgClone = img.clone()
+                                 .css({
+                                     position: 'absolute',
+                                     top: img.offset().top,
+                                     left: img.offset().left,
+                                     width: img.width(),
+                                     height: img.height(),
+                                     zIndex: 1000,
+                                     borderRadius: '10px',
+                                     opacity: 0.8
+                                 })
+                                 .appendTo('body');
+
+                imgClone.animate({
+                    top: cart.offset().top + cart.height()/2,
+                    left: cart.offset().left + cart.width()/2,
+                    width: 30,
+                    height: 30,
+                    opacity: 0.5
+                }, 800, 'swing', function() {
+                    imgClone.remove();
+                });
+            }
+
+            $(document).on('click', '.add-to-cart-btn', function () {
+                var card = $(this).closest('.product-card');
+                var productId = card.data('product-id');
+                var img = card.find('.product-img');
+
+                $.ajax({
+                    url: '/Cart/Add',
+                    type: 'POST',
+                    data: { id: productId },
+                    success: function (data) {
+                        if (data.success) {
+                            // Hiệu ứng bay vào giỏ
+                            flyToCart(img, '.cart-count');
+
+                            // Cập nhật cart count với hiệu ứng
+                            animateCartCount(data.cartCount);
+
+                            // Giảm số lượng sản phẩm trong card
+                            var qty = card.data('quantity') - 1;
+                            card.data('quantity', qty);
+
+                            if (qty <= 0) {
+                                card.find('.badge-stock')
+                                    .removeClass('badge-instock')
+                                    .addClass('badge-outstock')
+                                    .text('Hết hàng');
+
+                                card.find('.add-to-cart-btn')
+                                    .replaceWith('<button class="btn btn-out w-100" disabled>Hết hàng</button>');
+                            }
+
+                            showToast(card, data.message);
+                        } else {
+                            showToast(card, data.message || 'Thêm thất bại', false);
+                        }
+                    },
+                    error: function () {
+                        showToast(card, 'Lỗi server, vui lòng thử lại', false);
+                    }
+                });
+            });
+
+        });
+
+    </script>
+}
+

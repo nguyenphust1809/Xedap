@@ -1,0 +1,51 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model IEnumerable<IdentityRole>
+
+@{
+    ViewData["Title"] = "List Role";
+}
+
+<h3>Danh sách Role</h3>
+
+<a asp-area="Admin"
+   asp-controller="Role"
+   asp-action="Create"
+   class="btn btn-primary mb-2">
+    Thêm Role
+</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Role Name</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Name</td>
+                <td>
+                    <a asp-area="Admin"
+                       asp-controller="Role"
+                       asp-action="Edit"
+                       asp-route-id="@item.Id"
+                       class="btn btn-warning btn-sm me-1">
+                        <i class="bi bi-pencil-square"></i> Sửa
+                    </a>
+                    <a asp-area="Admin"
+                       asp-controller="Role"
+                       asp-action="Delete"
+                       asp-route-id="@item.Id"
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('Bạn có chắc chắn muốn xóa Role này không?')">
+                        <i class="bi bi-trash"></i> Xóa
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

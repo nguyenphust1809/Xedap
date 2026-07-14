@@ -1,0 +1,229 @@
+﻿@using Xedap.Models
+@using Xedap.Models.ViewModels
+@using Xedap.Repository
+@inject DataContext _context
+@model CartItemViewModel
+
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - NguyenPhuShop</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="..." crossorigin="anonymous" />
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #e91e63;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            table th, table td {
+                padding: 12px;
+                text-align: center;
+                border-bottom: 1px solid #ddd;
+            }
+
+            table thead tr {
+                background: #f1f1f1;
+            }
+
+            table img {
+                border-radius: 5px;
+            }
+
+        .quantity-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .quantity-input {
+            width: 55px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .btn-default {
+            background: #f0f0f0;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .grand-total {
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .btn-checkout {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #e91e63;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Giỏ hàng của bạn</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Ảnh</th>
+                    <th>Sản phẩm</th>
+                    <th>Giá</th>
+                    <th>Số lượng</th>
+                    <th>Tổng</th>
+                    <th>Xóa</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.CartItems.Any())
+                {
+                    foreach (var item in Model.CartItems)
+                    {
+                        var maxQty = _context.Products.FirstOrDefault(p => p.Id == item.ProductId)?.Quantity ?? 0;
+                        <tr data-id="@item.ProductId" data-max="@maxQty">
+                            <td><img src="~/media/products/@item.Image" width="70" height="100" /></td>
+                            <td>@item.ProductName</td>
+                            <td class="price">@item.Price.ToString("N0")</td>
+                            <td>
+                                <div class="quantity-wrapper">
+                                    <button class="btn btn-default btn-decrease" data-id="@item.ProductId">-</button>
+                                    <input type="number" min="1" max="@maxQty" value="@item.Quantity"
+                                           class="quantity-input" data-id="@item.ProductId" />
+                                    <button class="btn btn-default btn-increase" data-id="@item.ProductId">+</button>
+                                </div>
+                            </td>
+                            <td class="total">@((item.Price * item.Quantity).ToString("N0"))</td>
+                            <td>
+                                <a class="btn btn-danger" asp-controller="Cart" asp-action="Remove" asp-route-id="@item.ProductId">
+                                    <i class="fa fa-times"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6">
+                            Giỏ hàng trống <br />
+                            <a class="btn btn-primary mt-2" asp-controller="Home" asp-action="Index">Tiếp tục mua sắm</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (Model.CartItems.Any())
+        {
+            <div class="grand-total">
+                Tổng tiền: <span id="grand-total">@Model.GrandTotal.ToString("N0")</span> VNĐ
+            </div>
+
+            <a href="/Checkout" class="btn-checkout">Thanh toán</a>
+        }
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(function () {
+            // Cập nhật tổng tiền khi thay đổi số lượng
+            function updateTotal() {
+                let total = 0;
+                $("tbody tr[data-id]").each(function () {
+                    const qty = parseInt($(this).find(".quantity-input").val());
+                    const price = parseInt($(this).find(".price").text().replace(/\./g, ""));
+                    const rowTotal = qty * price;
+                    $(this).find(".total").text(rowTotal.toLocaleString('vi-VN'));
+                    total += rowTotal;
+                });
+                $("#grand-total").text(total.toLocaleString('vi-VN'));
+            }
+
+            function sendUpdate(id, qty) {
+                $.post("@Url.Action("UpdateQuantity", "Cart")", { id: id, quantity: qty });
+            }
+
+            $(".btn-increase").click(function () {
+                const id = $(this).data("id");
+                const input = $(".quantity-input[data-id='" + id + "']");
+                let qty = parseInt(input.val()) + 1;
+                const max = parseInt(input.attr("max"));
+                if (qty > max) qty = max;
+                input.val(qty);
+                updateTotal();
+                sendUpdate(id, qty);
+            });
+
+            $(".btn-decrease").click(function () {
+                const id = $(this).data("id");
+                const input = $(".quantity-input[data-id='" + id + "']");
+                let qty = parseInt(input.val()) - 1;
+                if (qty < 1) qty = 1;
+                input.val(qty);
+                updateTotal();
+                sendUpdate(id, qty);
+            });
+
+            $(".quantity-input").change(function () {
+                const id = $(this).data("id");
+                let qty = parseInt($(this).val());
+                const max = parseInt($(this).attr("max"));
+                if (qty < 1) qty = 1;
+                if (qty > max) qty = max;
+                $(this).val(qty);
+                updateTotal();
+                sendUpdate(id, qty);
+            });
+        });
+    </script>
+</body>
+</html>

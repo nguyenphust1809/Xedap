@@ -1,0 +1,175 @@
+﻿@model IEnumerable<ProductModel>
+@{
+    ViewData["Title"] = "Danh sách sản phẩm";
+}
+
+<div class="container mt-4">
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <!-- Tiêu đề -->
+
+        <!-- Nút Thêm sản phẩm -->
+        <a asp-action="Create" class="btn btn-success shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Thêm sản phẩm
+        </a>
+
+        <!-- Nút Tải file mẫu -->
+        <a asp-action="DownloadSampleExcel" class="btn btn-outline-primary shadow-sm">
+            <i class="bi bi-download me-1"></i> Tải file mẫu Excel
+        </a>
+
+        <!-- Form Import Excel -->
+        <form asp-area="Admin" asp-controller="Product" asp-action="ImportExcel"
+              method="post" enctype="multipart/form-data"
+              class="d-flex align-items-center gap-2 m-0 flex-nowrap">
+
+            <!-- Biến input file thành nút giống Import Excel -->
+            <label class="btn btn-primary shadow-sm mb-0" style="cursor:pointer; min-width:180px;">
+                Chọn file
+                <input type="file" name="files" style="display:none;" required />
+            </label>
+
+            <input type="hidden" name="categoryId" value="1" />
+
+            <!-- Nút Import Excel -->
+            <button type="submit" class="btn btn-primary shadow-sm">Import Excel</button>
+
+        </form>
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table align-middle mb-0" id="myTable">
+                <thead class="table-primary text-center" >
+                    <tr>
+                        <th>#</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Số lượng</th>
+                        <th>Đã bán</th>
+
+                        <th>Mô tả</th>
+                        <th>Giá</th>
+                        <th>Giá vốn</th>
+                        <th>Hình ảnh</th>
+                        <th>Đường dẫn</th>
+                        <th>Danh mục</th>
+                        <th>Thương hiệu</th>
+                        <th>Quản lý</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-center">@item.Id</td>
+                            <td class="fw-medium">@item.Name</td>
+                            <td ><b>@item.Quantity</b><br /><a asp-controller="Product" asp-action="AddQuantity" asp-route-Id="@item.Id">Thêm số lượng</a></td>
+                            <td><b>@item.Sold</b></td>
+
+                        <td class="description">@Html.Raw(item.Description)</td>
+                        <td class="text-danger fw-semibold">@item.Price.ToString("N0") ₫</td>
+                            <td class="text-danger fw-semibold">@item.CapitalPrice.ToString("N0") ₫</td>
+
+                            <td class="text-center">
+                                <img src="~/media/products/@item.Image" alt="Ảnh sản phẩm" width="80" height="80" class="rounded shadow-sm border" />
+                            </td>
+                            <td>@item.Slug</td>
+                            <td>@item.Category?.Name</td>
+                            <td>@item.Brand?.Name</td>
+                            <td class="text-center">
+                                <a asp-action="Edit"
+                                   asp-controller="Product"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-warning text-white me-1 shadow-sm">
+                                    <i class="bi bi-pencil-square"></i> Sửa
+                                </a>
+                                <a asp-action="Delete"
+                                   asp-controller="Product"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-danger shadow-sm"
+                                   onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này không?')">
+                                    <i class="bi bi-trash"></i> Xóa
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Kiểm tra xem DataTable đã khởi tạo chưa, tránh lỗi reinitialise
+            if (!DataTable.instances?.some(dt => dt.table.id === 'myTable')) {
+                new DataTable('#myTable', {
+                    layout: {
+                        topStart: {
+                            buttons: [
+                                { extend: 'copy', text: '📋 Sao chép' },
+                                { extend: 'csv', text: '📄 Xuất CSV' },
+                                { extend: 'excel', text: '📊 Xuất Excel' },
+                                { extend: 'pdf', text: '🧾 Xuất PDF' },
+                                { extend: 'print', text: '🖨️ In' }
+                            ]
+                        }
+                    },
+                    paging: true,
+                    lengthChange: false, // ẩn "Show entries"
+                    info: false,         // ẩn "Showing 1 to 25 of X entries"
+                    language: {
+                        search: " Tìm kiếm:",
+                        zeroRecords: "Không tìm thấy kết quả phù hợp",
+                        emptyTable: "Không có dữ liệu",
+                        paginate: {
+                            next: "Trang sau",
+                            previous: "Trang trước"
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .table img {
+        object-fit: cover;
+    }
+
+  
+
+    .btn-warning {
+        background-color: #f7b731;
+        border: none;
+    }
+
+
+  
+
+    .card {
+        border-radius: 10px;
+    }
+    .table td.description {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+</style>

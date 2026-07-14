@@ -1,0 +1,322 @@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>@ViewData["Title"] Abraham</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="~/assets/css/style-starter.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    @RenderSection("Styles", required: false)
+    <style>
+       .login-btn {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #000000 !important;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: none;
+}
+
+            .login-btn i {
+                font-size: 16px;
+            }
+
+            /* Không đổi màu khi hover hoặc focus */
+            .login-btn:hover,
+            .login-btn:focus,
+            .login-btn:active {
+                background-color: #fe980f !important;
+                color: #fff !important;
+            }
+
+    #site-header {
+    background: #ffffff !important;
+    transition: all 0.3s ease;
+    z-index: 9999;
+    color: #000000 !important;
+}
+
+#site-header .nav-link,
+#site-header .navbar-brand {
+    color: #000000 !important;
+}
+
+        .chat-btn {
+            color: #fff !important;
+            border: none;
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 0.2px;
+            border-radius: 25px; /* giống login-btn */
+            padding: 6px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px; /* khoảng cách icon và text */
+            transition: background-color 0.3s;
+        }
+
+            .chat-btn:focus,
+            .chat-btn:active {
+                background-color: #1565c0 !important; /* màu đậm hơn khi hover */
+                color: #fff !important;
+                text-decoration: none;
+            }
+
+            .chat-btn i {
+                font-size: 16px;
+            }
+            .w3l-footer-29-main,
+.w3l-footer-29-main .footer-29 {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+.w3l-footer-29-main p,
+.w3l-footer-29-main h5,
+.w3l-footer-29-main h6,
+.w3l-footer-29-main a,
+.w3l-footer-29-main li {
+    color: #000000 !important;
+}
+
+.w3l-footer-29-main .footer-title-29 {
+    color: #000000 !important;
+}
+
+.w3l-footer-29-main .bottom-copies {
+    border-color: #cccccc !important;
+}
+    </style>
+</head>
+
+<body>
+    <!-- 🧭 HEADER -->
+   <header id="site-header" class="fixed-top" style="background-color: #ffffff; border-bottom: 1px solid #e0e0e0;">
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light stroke py-lg-0">
+            <h1>
+                <a class="navbar-brand pe-xl-5 pe-lg-4" href="/">
+                    <img src="~/assets/images/logo.png" alt="Nguyễn Phú Bike" height="80" />
+                </a>
+            </h1>
+
+            <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon fa icon-expand fa-bars"></span>
+                <span class="navbar-toggler-icon fa icon-close fa-times"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarScroll">
+                <ul class="navbar-nav me-lg-auto my-2 my-lg-0 navbar-nav-scroll">
+                    @await Component.InvokeAsync("Categories")
+                    @await Component.InvokeAsync("Brands")
+
+                    <li class="nav-item">
+                        <a asp-controller="Product" asp-action="Index" class="nav-link">
+                            <i class="fa fa-store me-1"></i> Sản phẩm
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a asp-controller="Stores" asp-action="Index" class="nav-link">
+                            <i class="fa fa-store me-1"></i> Hệ thống cửa hàng
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a asp-controller="Cart" asp-action="Index" class="nav-link position-relative">
+                            <i class="fa fa-shopping-cart me-1"></i> Giỏ hàng
+                            <span class="cart-count">
+                                @((HttpContextAccessor.HttpContext?.Session?.GetInt32("CartCount") ?? 0))
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+
+                <li class="nav-item me-3" title="Chat với chúng tôi">
+                    <a href="/Chat" class="chat-btn">
+                        <i class="fas fa-comment-dots"></i> Chat
+                    </a>
+                </li>
+
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-user me-1"></i> @User.Identity.Name
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="accountDropdown">
+                            <li>
+                                <a class="dropdown-item" asp-action="Profile" asp-controller="Account">Thông tin tài khoản</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-action="History" asp-controller="Account">Lịch sử đơn hàng</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-action="UpdateAccount" asp-controller="Account">Cập nhật tài khoản</a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="px-3">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-link text-start p-0 w-100">
+                                        <i class="fa fa-sign-out me-1"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                   <li class="nav-item">
+                    <a href="/account/login"
+                    class="btn d-inline-flex align-items-center justify-content-center rounded-pill px-4 py-1 fw-semibold login-btn"
+                    style="background-color: #ffffff; color: #000000; border: 1px solid #000000;">
+                        <i class="fa fa-user me-2"></i>
+                        <span>Đăng nhập</span>
+                    </a>
+                </li>
+                }
+
+                <div id="search" class="w3lpop-overlay">
+                    <div class="w3lpopup">
+                        <form action="/product/search" method="get" class="d-flex">
+                            <input type="search" name="search" placeholder="Nhập từ khóa tìm kiếm..." required autofocus />
+                            <button type="submit"><span class="fas fa-search"></span></button>
+                            <a class="close" href="#">&times;</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+    <!-- 🧩 NỘI DUNG TRANG -->
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <!-- 🦶 FOOTER -->
+    <footer class="w3l-footer-29-main" style="background-color:#fff;">
+        <div class="footer-29 py-5">
+            <div class="container py-lg-4">
+                <div class="row align-items-center mb-3">
+                    <h2 class="sign-left col-lg-7" style="color: black !important;">
+                    </h2>
+
+                  
+                </div>
+
+                <div class="row footer-top-29 mt-md-5 mt-4">
+                    <!-- Về chúng tôi -->
+                    <div class="col-lg-4 col-md-6 footer-list-29 footer-1 pe-lg-5">
+                        <h6 class="footer-title-29" style="color: black;">Về chúng tôi</h6>
+                        <p>
+                            Nguyễn Phú Bike chuyên cung cấp các dòng xe đạp thể thao chính hãng chất lượng cao cùng dịch vụ bảo dưỡng chuyên nghiệp. Chúng tôi cam kết mang lại trải nghiệm di chuyển tuyệt vời nhất.
+                        </p>
+                        <div class="mt-3">
+                            <h5><a href="tel:+0902966704"><i class="fas fa-phone-alt me-1"></i> 0902 966 704</a></h5>
+                            <h5><a href="mailto:1150080030@sv.hcmunre.edu.vn"><i class="far fa-envelope me-1"></i> 1150080030@sv.hcmunre.edu.vn</a></h5>
+                        </div>
+                    </div>
+
+                    <!-- Liên kết -->
+                    <div class="col-lg-2 col-md-6 footer-list-29 footer-3 mt-lg-0 mt-5">
+                        <h6 class="footer-title-29">Liên kết</h6>
+                        <ul class="footer-listw3">
+                            <li><a href="/about">Giới thiệu</a></li>
+                            <li><a href="/contact">Liên hệ</a></li>
+                            <li><a href="/services">Cửa hàng</a></li>
+                            <li><a href="/terms">Điều khoản</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Dịch vụ -->
+                    <div class="col-lg-2 col-md-6 footer-list-29 footer-3 mt-lg-0 mt-5">
+                        <h6 class="footer-title-29">Dịch vụ</h6>
+                        <ul class="footer-listw3">
+                            <li><a href="#">Tư vấn kỹ thuật xe</a></li>
+                            <li><a href="#">Bảo dưỡng định kỳ</a></li>
+                            <li><a href="#">Vận chuyển tận nhà</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Kết nối -->
+                    <div class="col-lg-4 col-md-6 footer-list-29 footer-4 mt-lg-0 mt-5 ps-lg-5">
+                        <h6 class="footer-title-29">Kết nối với chúng tôi</h6>
+                        <p>Nhận thông tin mới nhất bằng cách đăng ký bản tin hàng tuần của chúng tôi</p>
+                        <form class="subscribe mt-2">
+                            <input type="email" placeholder="Nhập email của bạn" required style="border:2px solid #fe980f; color:#000; background:#fff; padding:8px; border-radius:4px;">
+                            <button><span class="fas fa-paper-plane"></span></button>
+                        </form>
+
+                        <div class="main-social-footer-29 mt-4">
+                            <a href="https://www.facebook.com/rich.nguyen.2904" class="facebook"><span class="fab fa-facebook-f"></span></a>
+                            <a href="#" class="twitter"><span class="fab fa-twitter"></span></a>
+                            <a href="#" class="instagram"><span class="fab fa-instagram"></span></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bottom-copies text-center mt-5 pt-4 border-top">
+                    <p style="color:#000;">© 2026 <strong>Nguyễn Phú Bike</strong>. Thiết kế bởi <a href="https://www.facebook.com/rich.nguyen.2904" target="_blank" style="color:#000;">Nguyễn Phú</a>.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 🔝 Nút lên đầu -->
+    <button onclick="topFunction()" id="movetop" title="Go to top">
+        <span class="fa fa-angle-up"></span>
+    </button>
+
+    <!-- 🧩 Script chung -->
+    <script src="~/assets/js/jquery-3.3.1.min.js"></script>
+    <script src="~/assets/js/theme-change.js"></script>
+
+    <script>
+        // Cuộn hiện navbar
+        $(window).on("scroll", function () {
+            if ($(window).scrollTop() >= 80) $("#site-header").addClass("nav-fixed");
+            else $("#site-header").removeClass("nav-fixed");
+        });
+
+        $(".navbar-toggler").on("click", function () {
+            $("header").toggleClass("active");
+            $("body").toggleClass("noscroll");
+        });
+
+        // Nút về đầu trang
+        window.onscroll = function () {
+            document.getElementById("movetop").style.display =
+                (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) ? "block" : "none";
+        };
+        function topFunction() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
+    </script>
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+
+
+</body>
+</html>

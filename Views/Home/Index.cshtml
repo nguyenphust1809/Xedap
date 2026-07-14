@@ -1,0 +1,562 @@
+@model IEnumerable<Xedap.Models.ProductModel>
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+
+<div class="bike-theme-wrapper">
+    <!-- 🎯 Modern Hero Section -->
+    <section class="hero-section position-relative overflow-hidden">
+<div class="hero-bg" style="background-image: linear-gradient(to right, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 100%), url('@Url.Content("~/assets/images/bike_banner.png")');"></div>            <div class="hero-content text-start text-dark">
+                <span class="hero-tagline text-uppercase mb-2 d-inline-block">BEYOND THE LIMITS</span>
+                <h1 class="hero-title fw-extrabold mb-3">CHINH PHỤC<br><span class="highlight-black">MỌI ĐỊA HÌNH</span></h1>
+                <p class="hero-desc mb-4">
+                    Trải nghiệm các dòng xe đạp thể thao cao cấp nhập khẩu nguyên chiếc. Đỉnh cao kỹ thuật, linh kiện chính hãng Shimano, bền bỉ cùng thời gian.
+                </p>
+                <div class="hero-actions d-flex flex-wrap gap-3">
+                    <a href="/Product" class="btn btn-primary-dark">Khám Phá Cửa Hàng <i class="fas fa-arrow-right ms-2"></i></a>
+                    <a href="/contact" class="btn btn-outline-dark-custom">Nhận Tư Vấn Kỹ Thuật <i class="fas fa-tools ms-2"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🛍️ Premium Products Section -->
+    <section class="products-section py-5">
+        <div class="container py-lg-4">
+            <div class="d-flex justify-content-between align-items-end mb-5">
+                <div>
+                    <span class="section-subtitle">DANH MỤC NỔI BẬT</span>
+                    <h2 class="section-title text-dark">SIÊU PHẨM THỂ THAO</h2>
+                </div>
+                <a href="/Product" class="btn btn-view-all">Xem tất cả xe <i class="fas fa-chevron-right ms-2"></i></a>
+            </div>
+
+            <div class="row g-4">
+                @foreach (var product in Model.Take(8))
+                {
+                    <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+                        <div class="card product-card h-100">
+                            <div class="product-image-container position-relative overflow-hidden">
+                                <span class="product-badge">NEW</span>
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="d-block h-100">
+                                    <img src="~/media/products/@(string.IsNullOrEmpty(product.Image) ? "no-image.png" : product.Image)"
+                                         alt="@product.Name"
+                                         class="product-img img-fluid w-100" />
+                                </a>
+                                <div class="product-overlay">
+                                    <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="btn btn-quick-view">
+                                        Chi tiết xe <i class="fas fa-eye ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="product-body p-3 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="product-meta d-flex justify-content-between align-items-center mb-1">
+                                        <span class="product-brand text-uppercase">@product.Brand?.Name</span>
+                                        <div class="product-rating">
+                                            <i class="fas fa-star text-warning"></i>
+                                            <span class="ms-1" style="font-size: 11px;">5.0</span>
+                                        </div>
+                                    </div>
+                                    <h6 class="product-name fw-semibold mb-2 text-truncate" title="@product.Name">
+                                        <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="text-dark text-decoration-none">
+                                            @product.Name
+                                        </a>
+                                    </h6>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                    <p class="product-price fw-bold mb-0">@product.Price.ToString("N0") ₫</p>
+                                    <button class="btn btn-favorite-circle add-btn-wishlist" data-product_id="@product.Id" title="Thêm vào yêu thích">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- 🎯 Promo Section -->
+    <section class="promo-section py-5 position-relative overflow-hidden">
+        <div class="container py-lg-4 position-relative">
+            <div class="card promo-card overflow-hidden">
+                <div class="row g-0 align-items-center">
+                    <div class="col-lg-6 position-relative">
+                        <img src="~/assets/images/bike_promo.png" alt="Siêu ưu đãi xe đạp" class="promo-img img-fluid w-100">
+                    </div>
+                    <div class="col-lg-6 p-4 p-md-5 text-dark">
+                        <span class="promo-badge mb-3 d-inline-block">GIỚI HẠN THÁNG NÀY</span>
+                        <h3 class="promo-title fw-bold mb-3">SIÊU DEAL XE ĐẠP ĐUA<br><span class="text-dark fw-extrabold">GIẢM ĐẾN 50%</span></h3>
+                        <p class="promo-text text-muted mb-4">
+                            Cơ hội sở hữu những dòng xe đạp đua (Road bike), xe đạp leo núi (MTB) chất lượng vượt trội của Giant, Trek với mức ưu đãi tốt nhất trong năm. Quà tặng kèm gói phụ kiện trị giá 1.500.000đ khi đặt mua hôm nay!
+                        </p>
+                        <div class="countdown-container d-flex gap-3 mb-4">
+                            <div class="time-block">
+                                <span class="time-num">02</span>
+                                <span class="time-label">Ngày</span>
+                            </div>
+                            <div class="time-block">
+                                <span class="time-num">14</span>
+                                <span class="time-label">Giờ</span>
+                            </div>
+                            <div class="time-block">
+                                <span class="time-num">45</span>
+                                <span class="time-label">Phút</span>
+                            </div>
+                            <div class="time-block">
+                                <span class="time-num">12</span>
+                                <span class="time-label">Giây</span>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <a href="/Product" class="btn btn-primary-dark">Săn Deal Ngay <i class="fas fa-shopping-cart ms-2"></i></a>
+                            <a href="/contact" class="btn btn-outline-dark-custom">Xem Chi Tiết</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ⚙️ Features Grid -->
+    <section class="features-section py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-card text-center p-4">
+                        <div class="feature-icon-wrapper mb-3">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <h5 class="feature-title mb-2">Thanh Toán Linh Hoạt</h5>
+                        <p class="feature-desc text-muted">Hỗ trợ trả góp 0%, thanh toán COD, chuyển khoản ngân hàng tiện lợi.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-card text-center p-4">
+                        <div class="feature-icon-wrapper mb-3">
+                            <i class="fas fa-truck-loading"></i>
+                        </div>
+                        <h5 class="feature-title mb-2">Giao Lắp Miễn Phí</h5>
+                        <p class="feature-desc text-muted">Giao hàng nguyên thùng hoặc cân chỉnh hoàn thiện tận nhà trong 4h.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-card text-center p-4">
+                        <div class="feature-icon-wrapper mb-3">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h5 class="feature-title mb-2">Bảo Hành 5 Năm</h5>
+                        <p class="feature-desc text-muted">Bảo hành khung sườn lên đến 5 năm, linh kiện chính hãng bảo hành 1 năm.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-card text-center p-4">
+                        <div class="feature-icon-wrapper mb-3">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <h5 class="feature-title mb-2">Nhập Khẩu 100%</h5>
+                        <p class="feature-desc text-muted">Cam kết phân phối sản phẩm chính hãng Giant, Trek, Specialized, Shimano.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🏷️ Brands Section -->
+    <section class="brands-section py-5">
+        <div class="container text-center">
+            <span class="section-subtitle text-center mb-2 d-block">ĐỐI TÁC THƯƠNG HIỆU</span>
+            <h3 class="brands-title text-dark mb-4">NHỮNG ÔNG LỚN TRONG NGÀNH XE ĐẠP</h3>
+            <div class="brand-badges-row d-flex flex-wrap justify-content-center gap-4 py-3">
+                <div class="brand-badge-card"><span class="brand-text">GIANT BICYCLES</span></div>
+                <div class="brand-badge-card"><span class="brand-text">TREK BIKES</span></div>
+                <div class="brand-badge-card"><span class="brand-text">SPECIALIZED</span></div>
+                <div class="brand-badge-card"><span class="brand-text">CANNONDALE</span></div>
+                <div class="brand-badge-card"><span class="brand-text">SHIMANO PARTS</span></div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    :root {
+        --dark-bg: #ffffff;
+        --card-bg: #f5f5f5;
+        --border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .bike-theme-wrapper {
+        background-color: #ffffff;
+        font-family: 'Outfit', sans-serif !important;
+        overflow-x: hidden;
+    }
+
+    /* Hero */
+    .hero-section {
+        height: 85vh;
+        min-height: 550px;
+        position: relative;
+    }
+
+    .hero-bg {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-size: cover;
+        background-position: center;
+        transition: transform 10s ease;
+    }
+
+    .hero-section:hover .hero-bg { transform: scale(1.05); }
+
+    .hero-content { max-width: 600px; z-index: 5; }
+
+    .hero-tagline {
+        color: #000000;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 4px;
+    }
+
+    .hero-title {
+        font-family: 'Syncopate', sans-serif;
+        font-size: 48px;
+        line-height: 1.1;
+        letter-spacing: -1px;
+        color: #000000;
+    }
+
+    .highlight-black { color: #000000; }
+
+    .hero-desc {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #444444 !important;
+    }
+
+  
+    /* Buttons */
+    .btn-primary-dark {
+        background: #000000 !important;
+        color: #ffffff !important;
+        font-weight: 600;
+        font-size: 14px;
+        padding: 12px 28px;
+        border-radius: 30px;
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary-dark:hover {
+        background: #333333 !important;
+        transform: translateY(-3px);
+    }
+
+    .btn-outline-dark-custom {
+        background: transparent !important;
+        color: #000000 !important;
+        font-weight: 600;
+        font-size: 14px;
+        padding: 12px 28px;
+        border-radius: 30px;
+        border: 1px solid #000000 !important;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-dark-custom:hover {
+        background: #000000 !important;
+        color: #ffffff !important;
+        transform: translateY(-3px);
+    }
+
+    /* Products */
+    .products-section { background-color: #ffffff; }
+
+    .section-subtitle {
+        color: #000000;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 3px;
+        display: block;
+    }
+
+    .section-title {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+
+    .btn-view-all {
+        font-size: 14px;
+        font-weight: 600;
+        color: #555555 !important;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .btn-view-all:hover { color: #000000 !important; }
+
+    .product-card {
+        background: #f5f5f5 !important;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 16px !important;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .product-card:hover {
+        transform: translateY(-8px);
+        border-color: #000000 !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-image-container {
+        height: 220px;
+        background: #e8e8e8;
+    }
+
+    .product-img {
+        height: 100% !important;
+        object-fit: cover !important;
+        transition: transform 0.5s ease;
+    }
+
+    .product-card:hover .product-img { transform: scale(1.08); }
+
+    .product-badge {
+        position: absolute;
+        top: 12px; left: 12px;
+        background: #000000;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 20px;
+        z-index: 2;
+    }
+
+    .product-overlay {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1;
+    }
+
+    .product-image-container:hover .product-overlay { opacity: 1; }
+
+    .btn-quick-view {
+        background: #fff !important;
+        color: #000 !important;
+        font-weight: 700;
+        font-size: 12px;
+        padding: 8px 18px;
+        border-radius: 20px;
+        border: none;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+    }
+
+    .product-image-container:hover .btn-quick-view { transform: translateY(0); }
+
+    .product-brand {
+        font-size: 10px;
+        color: #888;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+    }
+
+    .product-name a {
+        font-size: 15px;
+        transition: color 0.2s ease;
+    }
+
+    .product-name a:hover { color: #333333 !important; }
+
+    .product-price {
+        color: #000000;
+        font-size: 17px;
+    }
+
+    .btn-favorite-circle {
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        background: #e8e8e8;
+        border: 1px solid #ccc;
+        color: #555;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-favorite-circle:hover {
+        background: #000000;
+        border-color: #000000;
+        color: #fff;
+    }
+
+    /* Promo */
+    .promo-section { background: #f5f5f5; }
+
+    .promo-card {
+        background: #ffffff !important;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 24px !important;
+    }
+
+    .promo-img {
+        height: 100%;
+        object-fit: cover;
+        min-height: 350px;
+    }
+
+    .promo-badge {
+        background: #f0f0f0;
+        color: #000000;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        padding: 6px 14px;
+        border-radius: 30px;
+        border: 1px solid #cccccc;
+    }
+
+    .promo-title { font-size: 28px; color: #000000; }
+
+    /* Countdown */
+    .time-block {
+        background: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        width: 65px; height: 65px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .time-num {
+        font-size: 20px;
+        font-weight: 800;
+        color: #000000;
+        line-height: 1.1;
+    }
+
+    .time-label {
+        font-size: 10px;
+        color: #777;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    /* Features */
+    .features-section { background: #f5f5f5; }
+
+    .feature-card {
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 16px;
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        border-color: #000000;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .feature-icon-wrapper {
+        font-size: 28px;
+        color: #000000;
+    }
+
+    .feature-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #000000;
+    }
+
+    .feature-desc {
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    /* Brands */
+    .brands-section {
+        background: #ffffff;
+        border-top: 1px solid #e0e0e0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .brand-badge-card {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 150px;
+        transition: all 0.3s ease;
+    }
+
+    .brand-badge-card:hover {
+        border-color: #000000;
+        background: #eeeeee;
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .brand-text {
+        font-family: 'Syncopate', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        color: #555;
+        letter-spacing: 1px;
+        transition: color 0.3s ease;
+    }
+
+    .brand-badge-card:hover .brand-text { color: #000000; }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            console.log("Premium Bike theme initialised.");
+
+            let timer = setInterval(function() {
+                $('.time-block').each(function() {
+                    let numEl = $(this).find('.time-num');
+                    let current = parseInt(numEl.text());
+                    if($(this).find('.time-label').text() === 'GIÂY') {
+                        let sec = current - 1;
+                        if(sec < 0) {
+                            sec = 59;
+                            let minEl = $('.time-block').eq(2).find('.time-num');
+                            let min = parseInt(minEl.text()) - 1;
+                            if(min < 0) min = 59;
+                            minEl.text(min < 10 ? '0' + min : min);
+                        }
+                        numEl.text(sec < 10 ? '0' + sec : sec);
+                    }
+                });
+            }, 1000);
+        });
+    </script>
+}

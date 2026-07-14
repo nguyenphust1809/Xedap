@@ -1,0 +1,359 @@
+﻿@model ProductDetailsViewModel
+@{
+    ViewData["Title"] = "Chi Tiết Sản Phẩm";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <style>
+        /* ===== UI chỉnh gọn đẹp ===== */
+        body {
+            padding-top: 120px !important; /* tránh header che */
+            background: #f8f9fa;
+        }
+
+        .product-detail {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+        }
+
+        .product-image {
+            background: #fafafa;
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 420px;
+        }
+
+            .product-image img {
+                max-height: 100%;
+                max-width: 100%;
+                object-fit: contain;
+            }
+
+        .price {
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: #e60023;
+        }
+
+        .brand-badge {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .quantity-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quantity-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            border: 1px solid #e9e9e9;
+        }
+
+        .quantity-input {
+            width: 72px;
+            text-align: center;
+            border: 1px solid #e9e9e9;
+            border-radius: 8px;
+            padding: .45rem;
+        }
+
+        .btn-add-cart {
+            background: linear-gradient(45deg,#ff416c,#ff4b2b);
+            color: #fff;
+            border: none;
+            padding: .6rem 1.1rem;
+            border-radius: 10px;
+        }
+
+        .btn-buy-now {
+            background: linear-gradient(45deg,#ff9900,#ff6600);
+            color: #fff;
+            border: none;
+            padding: .6rem 1.1rem;
+            border-radius: 10px;
+        }
+
+        .related-card {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+            transition: .25s;
+        }
+
+            .related-card:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            }
+
+        /* Toast */
+        .top-right-toast {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 12000;
+            min-width: 240px;
+        }
+    </style>
+}
+
+<!-- ===== Product Info ===== -->
+<div class="container mt-4">
+    <div class="product-detail row gx-5">
+        <div class="col-lg-5">
+            <div class="product-image">
+                <img src="~/media/products/@Model.ProductDetails.Image" alt="@Model.ProductDetails.Name" />
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                <img src="~/media/products/@Model.ProductDetails.Image" class="img-thumbnail" style="width:84px;height:84px;object-fit:cover;" />
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <h1 class="h3 fw-bold">@Model.ProductDetails.Name</h1>
+
+            <div class="brand-badge mb-2">
+                Danh mục: <strong>@Model.ProductDetails.Category?.Name</strong> •
+                Thương hiệu: <strong>@Model.ProductDetails.Brand?.Name</strong>
+            </div>
+
+            <div class="mb-3">
+                <span class="price">@Model.ProductDetails.Price.ToString("#,##0 VNĐ")</span>
+                @if (Model.ProductDetails.Quantity <= 0)
+                {
+                    <span class="badge bg-secondary ms-2">Hết hàng</span>
+                }
+                else
+                {
+                    <span class="badge bg-success ms-2">Còn hàng</span>
+                }
+            </div>
+
+            <!-- ADD TO CART FORM -->
+            <form id="cartForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="productId" value="@Model.ProductDetails.Id" />
+
+                <div class="d-flex align-items-center mb-3">
+                    <label class="me-3 fw-semibold mb-0">Số lượng</label>
+
+                    <div class="quantity-wrapper me-3">
+                        <button type="button" id="decrease" class="quantity-btn">−</button>
+                        <input id="quantity" type="number" min="1" value="1" class="quantity-input" />
+                        <button type="button" id="increase" class="quantity-btn">+</button>
+                    </div>
+
+                    @if (Model.ProductDetails.Quantity > 0)
+                    {
+                        <button type="button" class="btn-add-cart me-2 add-to-cart-btn">
+                            <i class="fa fa-cart-plus"></i> Thêm vào giỏ
+                        </button>
+
+                        <button formaction="/Checkout" formmethod="post" class="btn-buy-now">
+                            <i class="fa fa-bolt"></i> Mua ngay
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-outline-secondary" disabled>Hết hàng</button>
+                    }
+                </div>
+            </form>
+
+            <div class="text-muted small">
+                <i class="fa fa-truck"></i> Giao nhanh trong nội thành •
+                <i class="fa fa-undo-alt"></i> 30 ngày đổi trả
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Tabs ===== -->
+    <div class="mt-5">
+        <ul class="nav nav-tabs">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#desc">Chi tiết</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#reviews">Đánh giá</button></li>
+        </ul>
+
+        <div class="tab-content p-4 bg-white border border-top-0 rounded-bottom shadow-sm">
+            <div id="desc" class="tab-pane fade show active">@Html.Raw(Model.ProductDetails.Description)</div>
+
+            <div id="reviews" class="tab-pane fade">
+                <h5>Viết đánh giá</h5>
+                <form asp-action="CommentProduct" asp-controller="Product" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" asp-for="Rating.ProductId" value="@Model.ProductDetails.Id" />
+
+                    <div class="mb-3">
+                        <label>Tên</label>
+                        <input asp-for="Rating.Name" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Email</label>
+                        <input asp-for="Rating.Email" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Giới tính</label>
+                        <select asp-for="Rating.Gender" class="form-control">
+                            <option value="Male">Nam</option>
+                            <option value="Female">Nữ</option>
+                            <option value="Other">Khác</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Bình luận</label>
+                        <textarea asp-for="Rating.Comment" class="form-control"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Số sao</label>
+                        <select asp-for="Rating.Star" class="form-control">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-danger">Gửi đánh giá</button>
+                </form>
+                <hr />
+
+                <h5>Đánh giá của khách hàng (@Model.ProductDetails.Ratings.Count)</h5>
+
+                @if (Model.ProductDetails.Ratings.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var r in Model.ProductDetails.Ratings.OrderByDescending(x => x.Id))
+                        {
+                            <div class="list-group-item mb-2 d-flex">
+                                <!-- Avatar tự động theo email -->
+                                <img src="@GetAvatarByGender(r.Gender)" class="rounded-circle me-3" style="width:48px;height:48px;" />
+
+                                <div>
+                                    <div class="d-flex justify-content-between">
+                                        <strong>@r.Name</strong>
+                                        <span>
+                                            @for (int i = 0; i < r.Star; i++)
+                                            {
+                                                <i class="fa fa-star text-warning"></i>
+                                            }
+                                        </span>
+                                    </div>
+                                    <div class="small text-muted">@r.Email</div>
+                                    <p class="mt-1 mb-0">@r.Comment</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Chưa có đánh giá nào.</p>
+                }
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Related Products ===== -->
+    <div class="mt-5">
+        <h4>Sản phẩm liên quan</h4>
+        <div class="row g-3 mt-2">
+            @foreach (var item in (IEnumerable<ProductModel>)ViewBag.RelatedProducts)
+            {
+                <div class="col-6 col-md-3">
+                    <div class="related-card p-2 text-center">
+                        <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id">
+                            <img src="~/media/products/@item.Image" class="img-fluid" style="max-height:140px;object-fit:cover;" />
+                        </a>
+                        <div class="text-danger fw-bold small">@item.Price.ToString("#,##0 VNĐ")</div>
+                        <div class="small text-truncate">@item.Name</div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="top-right-toast">
+    <div id="cartToast" class="toast text-white bg-success">
+        <div class="d-flex">
+            <div class="toast-body">Đã thêm vào giỏ hàng.</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Quantity
+        $("#increase").click(() => {
+            let q = $("#quantity");
+            q.val(Math.max(1, parseInt(q.val()) + 1));
+        });
+        $("#decrease").click(() => {
+            let q = $("#quantity");
+            q.val(Math.max(1, parseInt(q.val()) - 1));
+        });
+
+        // Toast helper
+        function showToast(msg) {
+            var t = document.getElementById("cartToast");
+            t.querySelector(".toast-body").textContent = msg;
+            new bootstrap.Toast(t).show();
+        }
+
+        // AJAX Add to Cart
+        $(".add-to-cart-btn").click(function () {
+            let id = $("#productId").val();
+            let quantity = $("#quantity").val();
+            let token = $('input[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "/Cart/Add",
+                type: "POST",
+                data: {
+                    id: id,
+                    quantity: quantity,
+                    __RequestVerificationToken: token
+                },
+                success: function (resp) {
+                    if (resp.success) {
+                        $(".cart-count").text(resp.cartCount);
+                        showToast(resp.message);
+                    } else showToast(resp.message);
+                },
+                error: () => showToast("Không thể kết nối server")
+            });
+        });
+    </script>
+@functions {
+    public string GetAvatarByGender(Gender gender)
+    {
+        return gender switch
+        {
+            Gender.Male => "/images/avatar-male.png",
+            Gender.Female => "/images/avatar-female.png",
+            _ => "/images/avatar-other.png"
+        };
+    }
+}
+
+
+
+}

@@ -1,0 +1,445 @@
+﻿@using System.Text.Json
+@using System.Text.Json.Serialization
+@model IEnumerable<Xedap.Models.Store>
+
+@{
+    ViewData["Title"] = "Hệ thống cửa hàng";
+
+    var jsonOptions = new JsonSerializerOptions
+    {
+        NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
+    var storesDto = Model.Select(s => new
+    {
+        id = s.Id,
+        name = s.Name,
+        address = s.Address,
+        province = s.Province,
+        district = s.District,
+        latitude = s.Latitude,
+        longitude = s.Longitude,
+        rating = s.Rating,
+        overview = s.Overview,
+        description = s.Description
+    });
+}
+
+<div class="container py-5 mt-5">
+    <h2 class="text-center mb-4 fw-bold text-uppercase">
+        <i class="fa fa-store me-2 text-warning"></i> Hệ thống cửa hàng Abraham bike
+        <span style="display:block; width:80px; height:3px; background-color:#ffc107; margin:10px auto 0;"></span>
+    </h2>
+
+    <!-- 🔽 Bộ lọc -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-4">
+            <select id="provinceSelect" class="form-select shadow-sm border-0" style="border-radius:10px; padding:10px;">
+                <option value="">-- Chọn Tỉnh/Thành phố --</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <select id="districtSelect" class="form-select shadow-sm border-0" style="border-radius:10px; padding:10px;" disabled>
+                <option value="">-- Chọn Quận/Huyện --</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- 🚗 Bộ chọn phương tiện -->
+    <div class="text-center mb-3">
+        <label class="fw-semibold me-2">Phương tiện:</label>
+        <select id="travelMode" class="form-select d-inline-block w-auto shadow-sm border-0" style="border-radius:10px; padding:8px;">
+            <option value="driving-car">🚗 Ô tô</option>
+            <option value="driving-motorcycle">🛵 Xe máy</option>
+            <option value="foot-walking">🚶‍♂️ Đi bộ</option>
+        </select>
+    </div>
+
+    <!-- 🗺️ Bản đồ -->
+    <div class="position-relative mb-3">
+        <div id="map" style="height:500px; border-radius:12px; overflow:hidden; box-shadow:0 4px 16px rgba(0,0,0,0.1);"></div>
+
+        <button id="btnLocate" class="btn btn-warning text-white position-absolute"
+                style="top:15px; right:15px; z-index:1100; border-radius:30px; padding:8px 16px; font-weight:600; border:none;">
+            <i class="fa fa-location-dot me-2"></i> Xem cửa hàng gần tôi
+        </button>
+    </div>
+
+    <!-- 🚦 Hướng dẫn chi tiết -->
+    <div id="directions" class="mt-3 p-3 bg-light rounded shadow-sm" style="display:none;">
+        <h5 class="fw-bold text-primary mb-3"><i class="fa fa-route me-2"></i>Hướng đi chi tiết</h5>
+        <ul id="stepsList" class="list-unstyled mb-0"></ul>
+    </div>
+
+    <!-- 📋 Danh sách cửa hàng -->
+    <div class="mt-5">
+        <h4 class="fw-semibold mb-3 text-center text-uppercase text-primary">
+            Danh sách cửa hàng
+        </h4>
+        <div class="row" id="storeList">
+            @foreach (var store in Model)
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm border-0 h-100 store-card"
+                         data-province="@store.Province"
+                         data-district="@store.District"
+                         data-lat="@store.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                         data-lng="@store.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                         data-name="@store.Name"
+                         data-address="@store.Address"
+                         style="border-radius:12px; overflow:hidden;">
+
+                        <!-- 🖼️ Ảnh minh họa -->
+                        @{
+                            string imagePath = "/images/default-store.jpg"; // ảnh mặc định
+                            if (store.Id == 1) imagePath = "/images/cn1.jpg";
+                            else if (store.Id == 2) imagePath = "/images/cn2.jpg";
+                            else if (store.Id == 3) imagePath = "/images/cn3.jpg";
+                            else if (store.Id == 4) imagePath = "/images/cn4.jpg";
+                            else if (store.Id == 5) imagePath = "/images/cn5.jpg";
+                            else if (store.Id == 6) imagePath = "/images/cn6.jpg";
+
+                        }
+
+                        <img src="@imagePath"
+                             alt="@store.Name"
+                             class="card-img-top"
+                             style="height:200px; object-fit:cover; border-bottom:3px solid #ffc107;">
+
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">
+                                <i class="fa fa-map-marker-alt text-danger me-2"></i>@store.Name
+                            </h5>
+                            <p class="card-text mb-1">@store.Address</p>
+                            <small class="text-muted">@store.District, @store.Province</small>
+                            <button class="btn btn-sm btn-outline-primary mt-2 btnRoute">
+                                <i class="fa fa-route me-1"></i> Chỉ đường đến đây
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+        // ✅ Lấy dữ liệu cửa hàng từ backend
+        const stores = @Html.Raw(JsonSerializer.Serialize(storesDto, jsonOptions));
+        console.table(stores); // 👈 Debug: xem dữ liệu trong console
+
+        // 🗺️ Khởi tạo bản đồ
+        const map = L.map('map').setView([10.776889, 106.700806], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImYxYmIwYTNmMTdlYTQ0MTdiMjI5ZTA2YjlkYmU5ZmY3IiwiaCI6Im11cm11cjY0In0=";
+        let routeLayer = null;
+        let userLocation = null;
+
+        // === Đổ danh sách tỉnh ===
+        const provinces = [...new Set(stores.map(s => s.province))].filter(p => p);
+        const provinceSelect = document.getElementById("provinceSelect");
+        const districtSelect = document.getElementById("districtSelect");
+
+        provinces.forEach(p => {
+            const opt = document.createElement("option");
+            opt.value = p;
+            opt.textContent = p;
+            provinceSelect.appendChild(opt);
+        });
+
+        // === Lọc tỉnh → huyện ===
+        provinceSelect.addEventListener("change", function () {
+            const province = this.value;
+            const districts = [...new Set(stores.filter(s => s.province === province).map(s => s.district))];
+
+            districtSelect.innerHTML = `<option value="">-- Chọn Quận/Huyện --</option>`;
+            districts.forEach(d => {
+                const opt = document.createElement("option");
+                opt.value = d;
+                opt.textContent = d;
+                districtSelect.appendChild(opt);
+            });
+
+            districtSelect.disabled = !province;
+            const filtered = province ? stores.filter(s => s.province === province) : stores;
+            renderMarkers(filtered);
+        });
+
+        // === Lọc huyện ===
+        districtSelect.addEventListener("change", function () {
+            const province = provinceSelect.value;
+            const district = this.value;
+            const filtered = stores.filter(s =>
+                (!province || s.province === province) &&
+                (!district || s.district === district)
+            );
+            renderMarkers(filtered);
+        });
+
+        // === Hiển thị marker cửa hàng ===
+                 function renderMarkers(data = stores) {
+                // ✅ Xóa tất cả marker cũ
+                if (window.markers) {
+                    window.markers.forEach(m => map.removeLayer(m));
+                }
+                window.markers = [];
+
+                data.forEach(store => {
+                    const lat = Number(store.latitude);
+                    const lng = Number(store.longitude);
+
+                    // Bỏ qua nếu tọa độ không hợp lệ
+                    if (!isFinite(lat) || !isFinite(lng)) return;
+
+                    // ✅ Xác định ảnh chi nhánh
+                    const imagePath = `/images/cn${store.id}.jpg`;
+                    const fallbackImg = "/images/default-store.jpg";
+
+                    // ✅ Nội dung popup hiển thị khi click marker
+                    const popupHtml = `
+                        <div style="min-width:260px; font-family:Arial, sans-serif;">
+                            <img src="${imagePath}"
+                                 onerror="this.src='${fallbackImg}'"
+                                 alt="${store.name}"
+                                 style="width:100%; height:120px; object-fit:cover; border-radius:8px; margin-bottom:8px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+
+                            <h6 class="fw-bold text-primary mb-1">${store.name}</h6>
+                            <p class="mb-1 text-muted" style="font-size:0.9rem;">📍 ${store.address}</p>
+
+                            <p class="mb-1" style="font-size:0.85rem;">
+                                ⭐ <strong>${store.rating ? store.rating.toFixed(1) : "4.8"}/5.0</strong>
+                            </p>
+
+                            <p class="mb-1" style="font-size:0.85rem;">
+                                <strong>Tổng quan:</strong> ${store.overview || "Đang cập nhật..."}
+                            </p>
+
+                            <p class="mb-2 text-muted" style="font-size:0.8rem;">
+                                <strong>Giới thiệu:</strong> ${store.description || "Thông tin đang được bổ sung."}
+                            </p>
+
+                            <button class="btn btn-sm btn-outline-primary w-100 btnRouteFromPopup"
+                                    data-lat="${lat}"
+                                    data-lng="${lng}"
+                                    data-name="${store.name}"
+                                    data-address="${store.address}">
+                                <i class="fa fa-route me-1"></i> Chỉ đường đến đây
+                            </button>
+                        </div>
+                    `;
+
+                    // ✅ Tạo marker cho mỗi cửa hàng
+                    const marker = L.marker([lat, lng])
+                        .addTo(map)
+                        .on("click", () => {
+                            // Khi click marker, mở popup tương ứng (đóng popup khác)
+                            marker.bindPopup(popupHtml, {
+                                closeButton: true,
+                                autoClose: true,
+                                className: "custom-popup"
+                            }).openPopup();
+                        });
+
+                    // Lưu lại marker
+                    window.markers.push(marker);
+                });
+                            map.on('popupopen', function (e) {
+                const btn = e.popup._contentNode.querySelector(".btnRouteFromPopup");
+                if (btn) {
+                    btn.addEventListener("click", function () {
+                        showRouteToStore(
+                            parseFloat(this.dataset.lat),
+                            parseFloat(this.dataset.lng),
+                            this.dataset.name,
+                            this.dataset.address
+                        );
+                    });
+                }
+            });
+
+                // ✅ Fit map để hiển thị toàn bộ marker
+                if (window.markers.length > 0) {
+                    const group = new L.featureGroup(window.markers);
+                    map.fitBounds(group.getBounds(), { padding: [40, 40] });
+                }
+            }
+
+            // ✅ Gọi khi load trang
+            renderMarkers(stores);
+
+        // === Lấy vị trí người dùng ===
+        function getUserLocation(callback) {
+            if (!navigator.geolocation) {
+                alert("Trình duyệt không hỗ trợ định vị.");
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    const { latitude, longitude } = pos.coords;
+                    userLocation = [latitude, longitude];
+                    callback(latitude, longitude);
+                },
+                // () => alert("Không thể lấy vị trí hiện tại.")
+            );
+        }
+
+        // === Tính & vẽ đường đi ===
+                  function showRouteToStore(latitude, longitude, name, address) {
+            if (!userLocation) {
+                getUserLocation((ulat, ulng) => showRouteToStore(latitude, longitude, name, address));
+                return;
+            }
+
+            // Chuyển về number an toàn
+            const lat = Number(latitude);
+            const lng = Number(longitude);
+
+            // Nếu Number(...) trả NaN thì dừng sớm và log
+            if (!isFinite(lat) || !isFinite(lng)) {
+                console.error("Tọa độ cửa hàng không hợp lệ:", latitude, longitude);
+                alert("Tọa độ cửa hàng không hợp lệ. Kiểm tra dữ liệu.");
+                return;
+            }
+
+            const [userLat, userLng] = userLocation;
+
+            let mode = document.getElementById("travelMode").value;
+            if (mode === "driving-motorcycle") mode = "cycling-regular";
+
+            // Format chuẩn với dấu chấm, 6 chữ số thập phân
+            const start = `${Number(userLng).toFixed(6)},${Number(userLat).toFixed(6)}`;
+            const end = `${lng.toFixed(6)},${lat.toFixed(6)}`;
+
+            // Log CHÍNH XÁC URL (1 chuỗi) để dễ debug
+            const url = `https://api.openrouteservice.org/v2/directions/${mode}?api_key=${ORS_API_KEY}&start=${start}&end=${end}&geometry_format=geojson`;
+            console.log("Gọi ORS (URL):", url);
+
+            // Xoá tuyến/marker cũ
+            if (routeLayer) map.removeLayer(routeLayer);
+            if (window.userMarker) map.removeLayer(window.userMarker);
+            if (window.storeMarker) map.removeLayer(window.storeMarker);
+
+            // Marker vị trí người dùng
+            window.userMarker = L.marker([userLat, userLng], {
+                icon: L.icon({
+                    iconUrl: 'https://cdn-icons-png.flaticon.com/512/64/64113.png',
+                    iconSize: [35, 35],
+                    iconAnchor: [17, 34],
+                })
+            }).addTo(map).bindPopup("<b>Vị trí của bạn</b>");
+
+            // Marker cửa hàng đang chọn (nổi bật)
+            window.storeMarker = L.marker([lat, lng], {
+                icon: L.icon({
+                    iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+                    iconSize: [35, 35],
+                    iconAnchor: [17, 34],
+                })
+            }).addTo(map).bindPopup(`<b>${name}</b><br>${address}`);
+
+            // Gọi ORS
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.features?.length) {
+                        console.warn("ORS trả về (không features):", data);
+                        alert("Không thể tính toán đường đi. Kiểm tra API key hoặc mode di chuyển.");
+                        return;
+                    }
+
+                    const route = data.features[0];
+                    const coords = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+
+                    routeLayer = L.polyline(coords, { color: '#007bff', weight: 5, opacity: 0.8 }).addTo(map);
+                    map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
+
+                    const distKm = (route.properties.summary.distance / 1000).toFixed(2);
+                    const durationMin = Math.round(route.properties.summary.duration / 60);
+
+                    L.popup()
+                        .setLatLng([lat, lng])
+                        .setContent(`
+                            <b>${name}</b><br>${address}<br>
+                            📍 <b>${distKm} km</b> — ⏱️ <b>${durationMin} phút</b><br>
+                            <a href="https://www.google.com/maps/dir/${userLat},${userLng}/${lat},${lng}" target="_blank">
+                                🗺️ Mở Google Maps
+                            </a>
+                        `)
+                        .openOn(map);
+
+                    // Hiển thị steps nếu có
+                    const steps = route.properties.segments?.[0]?.steps || [];
+                    const stepsList = document.getElementById("stepsList");
+                    const directionsDiv = document.getElementById("directions");
+                    stepsList.innerHTML = "";
+                    steps.forEach((s, i) => {
+                        const li = document.createElement("li");
+                        li.classList.add("mb-2");
+                        li.innerHTML = `
+                            <i class="fa fa-location-arrow text-primary me-2"></i>
+                            ${i + 1}. ${s.instruction}
+                            <small class="text-muted">(${(s.distance/1000).toFixed(2)} km)</small>
+                        `;
+                        stepsList.appendChild(li);
+                    });
+                    if (steps.length) directionsDiv.style.display = "block";
+                })
+                .catch(err => {
+                    console.error("Lỗi gọi ORS:", err);
+                    alert("Lỗi gọi OpenRouteService: " + err.message);
+                });
+        }
+
+
+              // === Gán sự kiện “Chỉ đường đến đây” ===
+        document.querySelectorAll(".btnRoute").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const card = this.closest(".store-card");
+
+                // 👇 Log dữ liệu để kiểm tra khi click
+                console.log("Cửa hàng được chọn:", {
+                    name: card.dataset.name,
+                    lat: card.dataset.lat,
+                    lng: card.dataset.lng
+                });
+
+                // 👇 Gọi hàm chỉ đường
+                showRouteToStore(
+                    parseFloat(card.dataset.lat),
+                    parseFloat(card.dataset.lng),
+                    card.dataset.name,
+                    card.dataset.address
+                );
+            });
+        });
+
+        // === “Cửa hàng gần tôi” ===
+        document.getElementById("btnLocate").addEventListener("click", () => {
+            getUserLocation((lat, lng) => {
+                map.setView([lat, lng], 13);
+                L.marker([lat, lng], {
+                    icon: L.icon({
+                        iconUrl: 'https://cdn-icons-png.flaticon.com/512/64/64113.png',
+                        iconSize: [35, 35],
+                        iconAnchor: [17, 34],
+                    })
+                }).addTo(map).bindPopup("<b>Vị trí của bạn</b>").openPopup();
+
+                let nearest = null, minDist = Infinity;
+                stores.forEach(store => {
+                    const d = map.distance([lat, lng], [store.latitude, store.longitude]);
+                    if (d < minDist) { minDist = d; nearest = store; }
+                });
+                if (nearest) showRouteToStore(nearest.latitude, nearest.longitude, nearest.name, nearest.address);
+            });
+        });
+    </script>
+}
