@@ -1,6 +1,5 @@
-﻿using Xedap;
-using Xedap.Areas.Admin.Repository;
-using Xedap.Hubs; 
+﻿using Xedap.Areas.Admin.Repository;
+using Xedap.Hubs;
 using Xedap.Models;
 using Xedap.Models.Momo;
 using Xedap.Repository;
@@ -10,15 +9,12 @@ using Xedap.Services.Llm;
 using Xedap.Services.Momo; // cho UseNetTopologySuite()
 using Xedap.Services.Tools;
 using Xedap.Services.Vector;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 using OpenAI.Chat;
 using OpenAI.Embeddings;
 using Xedap.Interfaces;
-using Xedap.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // ================== DATABASE ==================
@@ -163,7 +159,7 @@ app.MapHub<ChatHub>("/chathub");
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<DataContext>();
-    SeedData.SeedingData(context);
+    // SeedData.SeedingData(context);
 }
 
 // ================== RUN ==================
